@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MagicObfuscator V1.0.4</title>
+    <style>
+        :root {
+            --bg-color: #0d0614;
+            --panel-color: #160d22;
+            --accent-color: #7b2cbf;
+            --accent-hover: #9d4edd;
+            --text-color: #e0aaff;
+            --border-color: #3c165a;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: url('https://raw.githubusercontent.com/immagicmaster/MagicMaster/refs/heads/main/BACKGROUND.png') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .icon-top-left {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 48px;
+            height: 48px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            z-index: 100;
+            background: var(--panel-color);
+            object-fit: cover;
+        }
+
+        header {
+            margin: 30px 0 10px 0;
+            text-align: center;
+        }
+
+        header h1 {
+            color: var(--accent-hover);
+            margin: 0;
+            font-size: 2.5rem;
+            text-shadow: 0 0 15px var(--accent-color);
+        }
+
+        header p {
+            color: #7d7495;
+            font-size: 0.95rem;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .icon-top-left {
+                width: 36px;
+                height: 36px;
+                top: 10px;
+                left: 10px;
+            }
+        }
+
+        .panel {
+            background-color: var(--panel-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            backdrop-filter: blur(6px);
+        }
+
+        .panel label {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--accent-hover);
+            font-size: 1.1rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 400px;
+            background-color: #08030d;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: #fff;
+            padding: 12px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            resize: none;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: var(--accent-hover);
+            box-shadow: 0 0 8px rgba(157, 78, 221, 0.3);
+        }
+
+        .level-bar {
+            width: 90%;
+            max-width: 1200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 10px 0 15px 0;
+            padding: 12px 20px;
+            background-color: var(--panel-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+            backdrop-filter: blur(6px);
+        }
+
+        .level-bar label {
+            color: var(--accent-hover);
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .level-bar select {
+            background-color: #08030d;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 14px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .level-bar select:focus {
+            border-color: var(--accent-hover);
+        }
+
+        .level-info {
+            color: #7d7495;
+            font-size: 0.85rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 5px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(123, 44, 191, 0.3);
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(157, 78, 221, 0.5);
+        }
+
+        #btnDownload {
+            background-color: #3c165a;
+            border: 1px solid var(--border-color);
+        }
+
+        #btnDownload:hover {
+            background-color: #5a2086;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .panel-header label {
+            margin-bottom: 0 !important;
+        }
+        .upload-btn {
+            background: linear-gradient(135deg, #3c165a, #5a2086);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .upload-btn:hover {
+            background: linear-gradient(135deg, #5a2086, #7b2cbf);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(157, 78, 221, 0.4);
+            color: #fff;
+        }
+        .upload-btn svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+        input[type="file"] {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <img src="https://raw.githubusercontent.com/immagicmaster/MagicMaster/refs/heads/main/MagicOwn.png" class="icon-top-left" alt="MagicOwn">
+
+    <header>
+        <h1>MagicObfuscator V1.0.4 Lua/Luau</h1>
+        <p>Web MagicObfuscator helps protect your Lua/Luau code</p>
+    </header>
+
+    <div class="container">
+        <div class="panel">
+            <div class="panel-header">
+                <label for="txtOriginal">Mã Nguồn (Source Code)</label>
+                <input type="file" id="fileUpload" accept=".lua,.txt,.luau" onchange="handleFileUpload(this)">
+                <button class="upload-btn" onclick="document.getElementById('fileUpload').click()">
+                    <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    Upload
+                </button>
+            </div>
+            <textarea id="txtOriginal" placeholder="Paste Code Here..."></textarea>
+        </div>
+        <div class="panel">
+            <label for="txtObfuscated">Output (Obfuscated Code)</label>
+            <textarea id="txtObfuscated" readonly placeholder=""></textarea>
+        </div>
+    </div>
+
+    <div class="level-bar">
+        <label for="levelSelect">Obfuscate Level:</label>
+        <select id="levelSelect">
+            <option value="low">Low (100KB &rarr; ~300KB)</option>
+            <option value="medium" selected>Medium (100KB &rarr; ~500KB)</option>
+            <option value="strong">Strong (100KB &rarr; ~800KB)</option>
+        </select>
+        <span class="level-info">| Low: Giảm VM + StringEncoder | Medium: Bình thường | Strong: Tối đa</span>
+    </div>
+
+    <div class="btn-group">
+        <button id="btnObfuscate" onclick="processObfuscation()">Obfuscate</button>
+        <button id="btnDownload" onclick="downloadFile()">Download</button>
+    </div>
+
+<script>
+    function handleFileUpload(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById("txtOriginal").value = e.target.result;
+        };
+        reader.onerror = function() {
+            alert("Không thể đọc file! Vui lòng thử lại.");
+        };
+        reader.readAsText(file);
+        input.value = "";
+    }
+
+    // =================== UTILITIES ===================
+    function rngSeed(seed) {
+        let s = seed | 0;
+        return function() {
+            s = (s + 0x6D2B79F5) | 0;
+            let t = Math.imul(s ^ (s >>> 15), 1 | s);
+            t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+    }
+
+    function generateMathOps(target, steps) {
+        let current = Math.floor(Math.random() * 40000) + 10000;
+        let expr = '' + current;
+        for (let i = 0; i < steps - 5; i++) {
+            let op = Math.random() > 0.5 ? '+' : '-';
+            let val = Math.floor(Math.random() * 9000) + 1000;
+            if (op === '+') { current += val; expr += ' + ' + val; }
+            else { current -= val; expr += ' - ' + val; }
+        }
+        expr += ' + bit32.bxor(105, 105) - bit32.band(255, 0)';
+        let diff = target - current;
+        if (diff >= 0) expr += ' + ' + diff;
+        else expr += ' - ' + Math.abs(diff);
+        return '(' + expr + ')';
+    }
+
+    // =================== STRING ENCODER (from StringEncoder.ts) ===================
+    function encodeStringToTable(str, key) {
+        const bytes = [];
+        for (let i = 0; i < str.length; i++) {
+            bytes.push(str.charCodeAt(i) ^ key);
+        }
+        return '{' + bytes.join(',') + '}';
+    }
+
+    function generateDecoderLua(decoderName) {
+        const cacheName = '_c_' + decoderName + '_' + Math.random().toString(36).substring(2, 6);
+        return `local ${cacheName}={} local ${decoderName}=function(t,k) if ${cacheName}[t] then return ${cacheName}[t] end local s={} for i=1,#t do s[i]=string.char(bit32.bxor(t[i],k)) end local r=table.concat(s) ${cacheName}[t]=r return r end`;
+    }
+
+    // =================== ANTI TAMPER ===================
+    function generateAntiTamperLua(level) {
+        let code = `local _at=function() `;
+        code += `local _e=getfenv and getfenv() or _ENV `;
+        if (level !== 'low') {
+            code += `if _e.debug and type(_e.debug.getinfo)=="function" then local c=pcall(function() return _e.debug.getinfo(2) end) if not c then while true do end end end `;
+        }
+        code += `if _e.debugresults or _e._25ms then while true do end end `;
+        if (level === 'strong') {
+            code += `local _t=type(_e.table)=="table" and _e.table if _t and type(getmetatable(_t))=="table" then while true do end end `;
+            code += `local _g=_e.game if _g and type(_g)=="userdata" and getrawmetatable then local _mt=getrawmetatable(_g) if _mt and _mt.__namecall then while true do end end end `;
+        }
+        code += `end `;
+        return code;
+    }
+
+    // =================== ANTI DEBUG (from vm-gen.ts) ===================
+    function generateAntiDebugLua(level) {
+        let code = `local _ad=function() local _f=false `;
+        code += `if type(pcall)~="function" then _f=true end `;
+        code += `if type(select)~="function" then _f=true end `;
+        code += `if select("#",pcall(function() end))~=2 then _f=true end `;
+
+        const iterations = level === 'low' ? 1 : level === 'medium' ? 3 : 6;
+        for (let i = 0; i < iterations; i++) {
+            const r = 100 + Math.floor(Math.random() * 400);
+            code += `do local _t=(type(tick)=="function" and tick()) or (type(os)=="table" and os.clock()) or 0 `;
+            code += `local _s=0 for _i=1,${r} do _s=bit32.bxor(_s,_i) end `;
+            code += `local _t2=(type(tick)=="function" and tick()) or (type(os)=="table" and os.clock()) or 0 `;
+            code += `if _t>0 and _t2-_t>0.05 then _f=true end end `;
+        }
+
+        if (level === 'strong') {
+            code += `do local _mt=getmetatable("") if not _mt or type(_mt)~="table" then _f=true end end `;
+            code += `if getmetatable(0)~=nil then _f=true end `;
+            code += `if type(print)~="function" then _f=true end `;
+        }
+
+        code += `if _f then while true do end end end `;
+        return code;
+    }
+
+    // =================== CONTROL FLOW (from ControlFlowScrambler.ts) ===================
+    function applyControlFlow(code, level) {
+        if (level === 'low') return code;
+
+        const predicates = [
+            '7*7==49','1+1==2','15*15==225','100%7==2','12*12==144',
+            '3^2==9','type("")=="string"','not(1>2)','#""==0','type({})=="table"'
+        ];
+
+        const lines = code.split('\n');
+        const result = [];
+
+        for (const line of lines) {
+            const trimmed = line.trim();
+            let modified = line;
+
+            if (/^\s*if\s+.+\s+then\s*$/.test(trimmed)) {
+                const pred = predicates[Math.floor(Math.random() * predicates.length)];
+                modified = line.replace(/\s+then\s*$/, ` and ${pred} then`);
+            } else if (/^\s*while\s+.+\s+do\s*$/.test(trimmed)) {
+                const pred = predicates[Math.floor(Math.random() * predicates.length)];
+                modified = line.replace(/\s+do\s*$/, ` and ${pred} do`);
+            } else if (/^\s*until\s+.+$/.test(trimmed) && level === 'strong') {
+                const pred = predicates[Math.floor(Math.random() * predicates.length)];
+                modified = line.replace(/^(\s*until\s+)(.+)$/, `$1${pred} and $2`);
+            }
+
+            result.push(modified);
+        }
+        return result.join('\n');
+    }
+
+    // =================== VM (simplified from vm-gen.ts / vm-runner.ts / bytecode.ts) ===================
+    function generateVMLua(level) {
+        let code = `local _vm=function(_src,_k) `;
+        code += `local _st={} local _sp=0 local _ip=1 local _h={} `;
+        code += `local _push=function(v) _sp=_sp+1 _st[_sp]=v end `;
+        code += `local _pop=function() local v=_st[_sp] _st[_sp]=nil _sp=_sp-1 return v end `;
+        code += `local _top=function() return _st[_sp] end `;
+
+        const handlerCount = level === 'low' ? 12 : level === 'medium' ? 28 : 65;
+
+        // Core handlers
+        code += `_h[0]=function() _push(nil) end `;
+        code += `_h[1]=function() _push(true) end `;
+        code += `_h[2]=function() _push(false) end `;
+        code += `_h[3]=function() local _t={} for _i=1,#_src do _t[_i]=string.char(bit32.bxor(_src[_i],_k)) end _push(table.concat(_t)) end `;
+        code += `_h[4]=function() local _c=_pop() local _f,_e=loadstring(_c) if _f then _f() end end `;
+        code += `_h[5]=function() _push(_top()) end `;
+        code += `_h[6]=function() local a=_pop() local b=_pop() _push(a+b) end `;
+        code += `_h[7]=function() local a=_pop() local b=_pop() _push(a-b) end `;
+        code += `_h[8]=function() local a=_pop() _push(-a) end `;
+        code += `_h[9]=function() local a=_pop() _push(not a) end `;
+
+        // Fake handlers for complexity & size
+        for (let i = 10; i < handlerCount; i++) {
+            const r1 = Math.floor(Math.random() * 0xFFFF);
+            const r2 = Math.floor(Math.random() * 0xFFFF);
+            if (level === 'strong' && i % 5 === 0) {
+                // More complex fake handler for Strong
+                code += `_h[${i}]=function() local _a=${r1} local _b=${r2} _a=bit32.bxor(_a,_b) _b=bit32.band(_a,0xFF) _a=bit32.lrotate(_b,3) _push(_a) end `;
+            } else {
+                code += `_h[${i}]=function() local _a=${r1} local _b=${r2} _a=bit32.bxor(_a,_b) _push(_b) end `;
+            }
+        }
+
+        if (level === 'strong') {
+            // State machine / control flow flattening (from vm-gen.ts flattenChunk)
+            code += `local _state=0 local _acc=0 local _cyc=0 `;
+            code += `while _state~=9999 do `;
+            code += `if _ip>#_src then _state=9999 end `;
+            code += `if _state==0 then local _op=bit32.band(_src[_ip] or 0,0xFF) _ip=_ip+1 local _ha=_h[_op] if _ha then _ha() end _acc=bit32.bxor(_acc,_op) end `;
+            code += `_cyc=_cyc+1 `;
+            code += `if bit32.band(_cyc,0x7F)==0 then _state=0 end `;
+            code += `if bit32.band(_acc,0xFFFF)==0xDEAD then _state=9999 end `;
+            code += `end `;
+        } else if (level === 'medium') {
+            code += `while _ip<=#_src do local _op=_src[_ip] _ip=_ip+1 local _ha=_h[_op] if _ha then _ha() end end `;
+        } else {
+            // Low: direct decode & execute
+            code += `_h[3]() _h[4]() `;
+        }
+
+        code += `end `;
+        return code;
+    }
+
+    // =================== BOOTSTRAPPER ===================
+    function generateBootstrapperLua(level) {
+        let code = `local _boot=function(v1,v2) `;
+        // Decoder with cache (from StringEncoder.ts)
+        code += `local _c={} local _dec=function(t,k) if _c[t] then return _c[t] end local s={} for i=1,#t do s[i]=string.char(bit32.bxor(t[i],k)) end local r=table.concat(s) _c[t]=r return r end `;
+        code += `local _p=_dec(v1,v2) `;
+        code += `local _parts={} local _i=1 `;
+        code += `while _i<=#_p do local _s="" while _i<=#_p and _p:sub(_i,_i)~="\x01" do _s=_s.._p:sub(_i,_i) _i=_i+1 end table.insert(_parts,_s) _i=_i+1 end `;
+        code += `local _at=_parts[1] local _vm=_parts[2] local _src=_parts[3] `;
+        code += `_ad() `;
+        code += `loadstring(_at)() `;
+        code += `loadstring(_vm)() `;
+        code += `_vm(_src,v2) `;
+        code += `end `;
+        return code;
+    }
+
+    // =================== MAIN OBFUSCATION ===================
+    function processObfuscation() {
+        const src = document.getElementById("txtOriginal").value;
+        if (!src.trim()) {
+            alert("Vui lòng nhập code gốc trước!");
+            return;
+        }
+
+        const level = document.getElementById("levelSelect").value;
+
+        // XOR key & Math expression (v2) - giữ nguyên 30 toán tử + bit32
+        const xorKey = Math.floor(Math.random() * 150) + 50;
+        const v2Math = generateMathOps(xorKey, 30);
+
+        // 1. Generate components
+        const antiTamper = generateAntiTamperLua(level);
+        const antiDebug = generateAntiDebugLua(level);
+        const vmCode = generateVMLua(level);
+
+        // 2. Apply control flow to source (Medium/Strong)
+        let processedSrc = src;
+        if (level !== 'low') {
+            processedSrc = applyControlFlow(src, level);
+        }
+
+        // 3. Encode source as XOR byte table (for VM consumption)
+        const srcBytes = [];
+        for (let i = 0; i < processedSrc.length; i++) {
+            srcBytes.push(processedSrc.charCodeAt(i) ^ xorKey);
+        }
+        const srcTable = '{' + srcBytes.join(',') + '}';
+
+        // 4. Build payload v1: AntiTamper + VM + SourceTable (separated by )
+        const payload = antiTamper + "\x01" + vmCode + "\x01" + srcTable;
+
+        // 5. Encode v1 using StringEncoder logic (XOR table)
+        const v1Table = encodeStringToTable(payload, xorKey);
+
+        // 6. Generate bootstrapper (AntiDebug + bootstrap logic)
+        const bootstrapper = antiDebug + " " + generateBootstrapperLua(level);
+
+        // 7. Encode v3 (bootstrapper)
+        const v3Table = encodeStringToTable(bootstrapper, xorKey);
+
+        // 8. Build output (2 dòng)
+        let out = "--[ This File Protected By MagicObfuscator V1.0.4 ]\n";
+
+        // Dòng 2: khai báo v1, v2, v3 + inline decoder + bootstrapper execution
+        out += `local v1=${v1Table}; local v2=${v2Math}; local v3=${v3Table}; `;
+
+        // Inline decoder (từ StringEncoder.ts) để giải mã v3
+        const inlineDecoder = `local _d=function(t,k) local c={} return function(t,k) if c[t] then return c[t] end local s={} for i=1,#t do s[i]=string.char(bit32.bxor(t[i],k)) end local r=table.concat(s) c[t]=r return r end end`;
+        out += inlineDecoder + `; `;
+        out += `local _b=_d()(v3,v2); `;
+        out += `task.spawn(loadstring(_b),v1,v2);`;
+
+        document.getElementById("txtObfuscated").value = out;
+    }
+
+    function downloadFile() {
+        const code = document.getElementById("txtObfuscated").value;
+        if (!code.trim()) {
+            alert("Hãy ấn nút Obfuscate trước khi tải!");
+            return;
+        }
+        const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "Obfuscated.lua.txt";
+        link.click();
+    }
+</script>
+</body>
+</html>
