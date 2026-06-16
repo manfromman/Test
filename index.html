@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MagicObfuscator V1.0.4</title>
+    <style>
+        :root {
+            --bg-color: #0d0614;
+            --panel-color: #160d22;
+            --accent-color: #7b2cbf;
+            --accent-hover: #9d4edd;
+            --text-color: #e0aaff;
+            --border-color: #3c165a;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: url("https://raw.githubusercontent.com/immagicmaster/MagicMaster/refs/heads/main/BACKGROUND.png") no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .corner-icon {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            width: 52px;
+            height: 52px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            z-index: 1000;
+            background: rgba(22, 13, 34, 0.8);
+        }
+
+        header {
+            margin: 30px 0 10px 0;
+            text-align: center;
+        }
+
+        header h1 {
+            color: var(--accent-hover);
+            margin: 0;
+            font-size: 2.5rem;
+            text-shadow: 0 0 15px var(--accent-color);
+        }
+
+        header p {
+            color: #7d7495;
+            font-size: 0.95rem;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background-color: var(--panel-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+
+        .panel label {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--accent-hover);
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        textarea {
+            width: 100%;
+            height: 400px;
+            background-color: #08030d;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: #fff;
+            padding: 12px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            resize: none;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: var(--accent-hover);
+            box-shadow: 0 0 8px rgba(157, 78, 221, 0.3);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 10px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(123, 44, 191, 0.3);
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(157, 78, 221, 0.5);
+        }
+
+        #btnDownload {
+            background-color: #3c165a;
+            border: 1px solid var(--border-color);
+        }
+
+        #btnDownload:hover {
+            background-color: #5a2086;
+        }
+
+        .upload-btn {
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            background-color: #3c165a;
+            border: 1px solid var(--border-color);
+        }
+
+        .upload-btn:hover {
+            background-color: #5a2086;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+
+        .mode-btn {
+            padding: 8px 24px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background-color: #08030d;
+            color: var(--text-color);
+            transition: all 0.2s ease;
+        }
+
+        .mode-btn.active {
+            background-color: var(--accent-color) !important;
+            color: white !important;
+            border-color: var(--accent-color) !important;
+            box-shadow: 0 0 10px rgba(123, 44, 191, 0.4);
+        }
+
+        .mode-btn:hover:not(.active) {
+            background-color: #1a0f2e;
+        }
+    </style>
+</head>
+<body>
+    <img src="https://raw.githubusercontent.com/immagicmaster/MagicMaster/refs/heads/main/MagicOwn.png" class="corner-icon" alt="MagicOwn">
+
+    <header>
+        <h1>MagicObfuscator V1.0.4 Lua/Luau</h1>
+        <p>Web MagicObfuscator helps protect your Lua/Luau code</p>
+    </header>
+
+    <div class="container">
+        <div class="panel">
+            <label for="txtOriginal">
+                Mã Nguồn (Source Code)
+                <button class="upload-btn" onclick="uploadFile()">📁 Upload</button>
+            </label>
+            <textarea id="txtOriginal" placeholder="Paste Code Here..."></textarea>
+        </div>
+        <div class="panel">
+            <label for="txtObfuscated">Output (Obfuscated Code)</label>
+            <textarea id="txtObfuscated" readonly placeholder=""></textarea>
+            <div class="mode-selector">
+                <button class="mode-btn active" id="btnLow" onclick="setMode('low')">Low</button>
+                <button class="mode-btn" id="btnMedium" onclick="setMode('medium')">Medium</button>
+                <button class="mode-btn" id="btnStrong" onclick="setMode('strong')">Strong</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button id="btnObfuscate" onclick="processObfuscation()">Obfuscate</button>
+        <button id="btnDownload" onclick="downloadFile()">Download</button>
+    </div>
+
+<script>
+let currentMode = 'low';
+let _rng = Math.random;
+let _nameCounter = 0;
+
+function setMode(mode) {
+    currentMode = mode;
+    var btns = document.querySelectorAll('.mode-btn');
+    for (var i = 0; i < btns.length; i++) {
+        btns[i].classList.remove('active');
+    }
+    var targetId = 'btn' + mode.charAt(0).toUpperCase() + mode.slice(1);
+    var targetBtn = document.getElementById(targetId);
+    if (targetBtn) targetBtn.classList.add('active');
+}
+
+function uploadFile() {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.lua,.luau,.txt';
+    input.onchange = function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+            document.getElementById('txtOriginal').value = ev.target.result;
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
+function seedRandom(seed) {
+    var s = seed | 0;
+    _rng = function() {
+        s = (s + 0x6D2B79F5) | 0;
+        var t = Math.imul(s ^ (s >>> 15), 1 | s);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
+function rng() { return _rng(); }
+
+function randomName(len) {
+    var chars = "Il1O0_";
+    var name = "_";
+    for (var i = 0; i < len; i++) {
+        name += chars[Math.floor(rng() * chars.length)];
+    }
+    name += (_nameCounter++).toString(36);
+    return name;
+}
+
+function toHexInt(n) {
+    if (n === 0) return "0x0";
+    var sign = n < 0 ? "-" : "";
+    return sign + "0x" + Math.abs(n).toString(16);
+}
+
+function toUTF8Bytes(s) {
+    var bytes = [];
+    for (var i = 0; i < s.length; i++) {
+        var c = s.charCodeAt(i);
+        if (c < 0x80) bytes.push(c);
+        else if (c < 0x800) bytes.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f));
+        else if (c >= 0xd800 && c <= 0xdbff && i + 1 < s.length) {
+            var lo = s.charCodeAt(++i);
+            c = ((c - 0xd800) << 10) + (lo - 0xdc00) + 0x10000;
+            bytes.push(0xf0 | (c >> 18), 0x80 | ((c >> 12) & 0x3f), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
+        } else {
+            bytes.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
+        }
+    }
+    return bytes;
+}
+
+function b64Encode(bytes) {
+    var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    var out = "";
+    for (var i = 0; i < bytes.length; i += 3) {
+        var b0 = bytes[i], b1 = bytes[i + 1] || 0, b2 = bytes[i + 2] || 0;
+        out += chars[(b0 >> 2) & 0x3F];
+        out += chars[((b0 << 4) | (b1 >> 4)) & 0x3F];
+        out += (i + 1 < bytes.length) ? chars[((b1 << 2) | (b2 >> 6)) & 0x3F] : "=";
+        out += (i + 2 < bytes.length) ? chars[b2 & 0x3F] : "=";
+    }
+    return out;
+}
+
+function lzssCompress(input) {
+    var out = [];
+    var WIN = 4096, MIN_MATCH = 3, MAX_MATCH = 18, HASH_SIZE = 1 << 16, HASH_MASK = HASH_SIZE - 1;
+    var head = new Int32Array(HASH_SIZE);
+    for (var hi = 0; hi < HASH_SIZE; hi++) head[hi] = -1;
+    var prev = new Int32Array(input.length);
+    for (var pi = 0; pi < input.length; pi++) prev[pi] = -1;
+    function hash3(pos) {
+        return ((input[pos] << 10) ^ (input[pos+1] << 5) ^ input[pos+2]) & HASH_MASK;
+    }
+    var i = 0;
+    while (i < input.length) {
+        var flagByte = 0;
+        var flagPos = out.length;
+        out.push(0);
+        for (var bit = 0; bit < 8 && i < input.length; bit++) {
+            var bestLen = 0, bestOff = 0;
+            if (i + 2 < input.length) {
+                var h = hash3(i);
+                var j = head[h];
+                var limit = Math.max(0, i - WIN);
+                var chain = 0;
+                while (j >= limit && chain < 48) {
+                    var len = 0;
+                    while (len < MAX_MATCH && i + len < input.length && input[j + len] === input[i + len]) len++;
+                    if (len > bestLen) { bestLen = len; bestOff = i - j; }
+                    if (len === MAX_MATCH) break;
+                    j = prev[j];
+                    if (j < 0) break;
+                    chain++;
+                }
+                prev[i] = head[h];
+                head[h] = i;
+            }
+            if (bestLen >= MIN_MATCH) {
+                var encoded = ((bestOff - 1) << 4) | (bestLen - MIN_MATCH);
+                out.push((encoded >> 8) & 0xFF);
+                out.push(encoded & 0xFF);
+                for (var s = 1; s < bestLen && i + s + 2 < input.length; s++) {
+                    var sh = hash3(i + s);
+                    prev[i + s] = head[sh];
+                    head[sh] = i + s;
+                }
+                i += bestLen;
+            } else {
+                flagByte |= (1 << bit);
+                out.push(input[i]);
+                i++;
+            }
+        }
+        out[flagPos] = flagByte;
+    }
+    return out;
+}
+
+function generateMathOps(target, steps) {
+    var current = Math.floor(Math.random() * 40000) + 10000;
+    var expr = '' + current;
+    for (var i = 0; i < steps - 5; i++) {
+        var op = Math.random() > 0.5 ? '+' : '-';
+        var val = Math.floor(Math.random() * 9000) + 1000;
+        if (op === '+') { current += val; expr += ' + ' + val; }
+        else { current -= val; expr += ' - ' + val; }
+    }
+    expr += ' + bit32.bxor(105, 105) - bit32.band(255, 0)';
+    var diff = target - current;
+    if (diff >= 0) expr += ' + ' + diff;
+    else expr += ' - ' + Math.abs(diff);
+    return '(' + expr + ')';
+}
+
+function generateAntiTamper() {
+    return 'local _e=getfenv and getfenv() or _ENV;local _i=_e.debug and _e.debug.getinfo;if type(_i)=="function" then local c=pcall(function()return _i(2)end) if not c then while true do end end end;if _e.debugresults or _e._25ms then while true do end end;local _t=type(_e.table)=="table" and _e.table;if _t and type(getmetatable(_t))=="table" then while true do end end;';
+}
+
+function generateAntiDebug() {
+    return 'local _ad=function()local _t1=(type(tick)=="function" and tick())or(type(os)=="table" and type(os.clock)=="function" and os.clock())or 0;local _s=0;for _i=1,500 do _s=_s+bit32.bxor(_i,0xAA)end;local _t2=(type(tick)=="function" and tick())or(type(os)=="table" and type(os.clock)=="function" and os.clock())or 0;if _t1>0 and _t2-_t1>0.08 then return false end;if type(pcall)~="function" then return false end;if select("#",pcall(function()end))~=2 then return false end;return true end;if not _ad() then while true do end end;';
+}
+
+function generateSimpleVM(source, key) {
+    var bytes = toUTF8Bytes(source);
+    var K = [];
+    var code = [];
+    var chunkSize = 4;
+    for (var i = 0; i < bytes.length; i += chunkSize) {
+        var chunk = bytes.slice(i, i + chunkSize);
+        K.push(chunk);
+        code.push(0, K.length - 1);
+    }
+    var Kstr = K.map(function(c) { return '{' + c.join(',') + '}'; }).join(',');
+    var Cstr = code.join(',');
+    var vm = 'local _K={' + Kstr + '};local _C={' + Cstr + '};local _k=' + key + ';local _r={};for _i=1,#_K do local _t={};for _j=1,#_K[_i] do _t[_j]=string.char(bit32.bxor(_K[_i][_j],bit32.band(_k+_i*_j,0xFF))) end _r[_i]=table.concat(_t) end return table.concat(_r)';
+    return vm;
+}
+
+function applyStringEncoding(luaCode, key, mode) {
+    if (mode === 'low') return luaCode;
+    var decoderName = '_clydeDec_' + Math.random().toString(36).substring(2, 8);
+    var cacheName = '_c_' + Math.random().toString(36).substring(2, 6);
+    var encRatio = mode === 'strong' ? 1.0 : (mode === 'medium' ? 0.7 : 0.3);
+
+    var result = luaCode;
+    var stringRegex = /"([^"\\]|\\.)*"/g;
+    var strings = [];
+    var m;
+    while ((m = stringRegex.exec(luaCode)) !== null) {
+        if (m[0].length > 2 && rng() < encRatio) {
+            strings.push({full: m[0], val: m[0].slice(1, -1), index: m.index});
+        }
+    }
+
+    for (var i = strings.length - 1; i >= 0; i--) {
+        var s = strings[i];
+        var bytes = [];
+        for (var j = 0; j < s.val.length; j++) {
+            bytes.push(s.val.charCodeAt(j) ^ key);
+        }
+        var tbl = '{' + bytes.join(',') + '}';
+        var repl = decoderName + '(' + tbl + ',' + key + ')';
+        result = result.slice(0, s.index) + repl + result.slice(s.index + s.full.length);
+    }
+
+    var decoder = 'local ' + cacheName + '={};local function ' + decoderName + '(t,k) if ' + cacheName + '[t] then return ' + cacheName + '[t] end local s={} for i=1,#t do s[i]=string.char(bit32.bxor(t[i],k)) end local res=table.concat(s) ' + cacheName + '[t]=res return res end ';
+    return decoder + result;
+}
+
+function applyControlFlow(luaCode, mode) {
+    if (mode === 'low') return luaCode;
+    var predicates = [
+        '7*7==49', '1+1==2', '15*15==225', '100%7==2', '12*12==144', '3^2==9',
+        'type("")=="string"', 'type(1)=="number"', '#""==0', 'not(1>2)'
+    ];
+    var lines = luaCode.split('\n');
+    var result = [];
+    for (var li = 0; li < lines.length; li++) {
+        var line = lines[li];
+        var trimmed = line.trim();
+        if ((trimmed.indexOf('if ') === 0 || trimmed.indexOf('while ') === 0 || trimmed.indexOf('repeat ') === 0) && rng() < (mode === 'strong' ? 0.8 : 0.4)) {
+            var pred = predicates[Math.floor(rng() * predicates.length)];
+            result.push('if ' + pred + ' then');
+            result.push(line);
+            result.push('end');
+        } else {
+            result.push(line);
+        }
+        if (mode === 'strong' && rng() < 0.3) {
+            result.push('local ' + randomName(5) + '=' + Math.floor(rng()*9999));
+        }
+    }
+    return result.join('\n');
+}
+
+function encodeToSpecialFormat(str, key) {
+    var chars = 'iho#/!%$@&*()_+-=[]{}|;:<>?,.\';
+    var xored = '';
+    for (var i = 0; i < str.length; i++) {
+        xored += String.fromCharCode(str.charCodeAt(i) ^ key);
+    }
+    var result = '';
+    for (var i = 0; i < xored.length; i++) {
+        var b = xored.charCodeAt(i);
+        result += chars[(b >> 4) & 0xF] + chars[b & 0xF];
+    }
+    return result;
+}
+
+function buildCustomCipher(source, key) {
+    var srcBytes = toUTF8Bytes(source);
+    var sbox = [];
+    for (var i = 0; i < 256; i++) sbox[i] = i;
+    for (var i = 255; i > 0; i--) {
+        var j = Math.floor(rng() * (i + 1));
+        var tmp = sbox[i]; sbox[i] = sbox[j]; sbox[j] = tmp;
+    }
+    var isbox = new Array(256);
+    for (var i = 0; i < 256; i++) isbox[sbox[i]] = i;
+
+    var posSeed = (Math.floor(rng() * 254) + 1) & 0xFF;
+    var posStep = (Math.floor(rng() * 30) + 3) & 0xFF;
+    var prefixLen = 16 + Math.floor(rng() * 49);
+    var plainBytes = [prefixLen];
+    for (var i = 0; i < prefixLen; i++) plainBytes.push(Math.floor(rng() * 256));
+    for (var i = 0; i < srcBytes.length; i++) plainBytes.push(srcBytes[i]);
+
+    var encrypted = [];
+    var pk = posSeed;
+    for (var i = 0; i < plainBytes.length; i++) {
+        var xored = (plainBytes[i] ^ pk) & 0xFF;
+        encrypted.push(sbox[xored]);
+        pk = (pk + posStep) & 0xFF;
+    }
+
+    var stdAlpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    var alphaArr = stdAlpha.split('');
+    for (var i = alphaArr.length - 1; i > 0; i--) {
+        var j = Math.floor(rng() * (i + 1));
+        var tmp = alphaArr[i]; alphaArr[i] = alphaArr[j]; alphaArr[j] = tmp;
+    }
+    var cipherAlpha = alphaArr.join('');
+
+    var encoded = "";
+    for (var i = 0; i < encrypted.length; i += 3) {
+        var b0 = encrypted[i], b1 = encrypted[i + 1] || 0, b2 = encrypted[i + 2] || 0;
+        encoded += cipherAlpha[(b0 >> 2) & 0x3F];
+        encoded += cipherAlpha[((b0 << 4) | (b1 >> 4)) & 0x3F];
+        encoded += (i + 1 < encrypted.length) ? cipherAlpha[((b1 << 2) | (b2 >> 6)) & 0x3F] : "=";
+        encoded += (i + 2 < encrypted.length) ? cipherAlpha[b2 & 0x3F] : "=";
+    }
+
+    var nFrags = 3 + Math.floor(rng() * 3);
+    var fragSz = Math.ceil(encoded.length / nFrags);
+    var frags = [];
+    for (var i = 0; i < nFrags; i++) frags.push(encoded.slice(i * fragSz, (i + 1) * fragSz));
+
+    var chunkSz = 64;
+    var isboxChunks = [];
+    for (var i = 0; i < 256; i += chunkSz) {
+        isboxChunks.push(isbox.slice(i, i + chunkSz).join(","));
+    }
+
+    var vSc = randomName(3), vSb = randomName(3), vEnv = randomName(2), vTc = randomName(3);
+    var vLd = randomName(3), vB32 = randomName(3), vAlpha = randomName(4), vLut = randomName(3);
+    var vSbox = randomName(3), vFt = randomName(3), vData = randomName(3), vDec = randomName(3);
+    var vOut = randomName(3), vPk = randomName(2), vSkip = randomName(2), vReal = randomName(3);
+
+    function junkLine() {
+        var jv = randomName(2);
+        var variants = [
+            'local ' + jv + '=' + Math.floor(rng()*9999),
+            'local ' + jv + '={}',
+            'local ' + jv + '="' + randomName(6) + '"',
+            'local ' + jv + '=nil',
+            'local ' + jv + '=true',
+            'local ' + jv + '=#"' + randomName(3) + '"',
+            'local ' + jv + '=(function() return ' + Math.floor(rng()*999) + ' end)()',
+        ];
+        return variants[Math.floor(rng() * variants.length)];
+    }
+    function maybeJunk(lines) {
+        if (rng() > 0.4) {
+            var n = 1 + Math.floor(rng() * 3);
+            for (var i = 0; i < n; i++) lines.push(junkLine());
+        }
+    }
+
+    var lines = [];
+    var bootVariant = Math.floor(rng() * 3);
+    if (bootVariant === 0) {
+        lines.push('local ' + vSc + '=("")[("\\99\\104\\97\\114")]');
+        lines.push('local ' + vSb + '=("")[("\\98\\121\\116\\101")]');
+    } else if (bootVariant === 1) {
+        var _mt = randomName(2);
+        lines.push('local ' + _mt + '=("")[("\\114\\101\\112")]');
+        lines.push('local ' + vSc + '=("")[("\\99\\104\\97\\114")]');
+        lines.push('local ' + vSb + '=("")[("\\98\\121\\116\\101")]');
+    } else {
+        lines.push('local ' + vSb + '=("")[("\\98\\121\\116\\101")]');
+        lines.push('local ' + vSc + '=("")[("\\99\\104\\97\\114")]');
+    }
+    maybeJunk(lines);
+
+    lines.push('local ' + vEnv + '=(type(getfenv)=="function" and getfenv(0) or _G)');
+    var builtinLines = [
+        'local ' + vTc + '=' + vEnv + '[' + vSc + '(116,97,98,108,101)][' + vSc + '(99,111,110,99,97,116)]',
+        'local ' + vLd + '=' + vEnv + '[' + vSc + '(108,111,97,100,115,116,114,105,110,103)] or ' + vEnv + '[' + vSc + '(108,111,97,100)]',
+        'local ' + vB32 + '=' + vEnv + '[' + vSc + '(98,105,116,51,50)]',
+    ];
+    for (var i = builtinLines.length - 1; i > 0; i--) {
+        var j = Math.floor(rng() * (i + 1));
+        var tmp = builtinLines[i]; builtinLines[i] = builtinLines[j]; builtinLines[j] = tmp;
+    }
+    for (var bi = 0; bi < builtinLines.length; bi++) {
+        lines.push(builtinLines[bi]);
+        if (rng() > 0.6) lines.push(junkLine());
+    }
+    maybeJunk(lines);
+
+    var buildLut = function() {
+        var l = [];
+        l.push('local ' + vAlpha + '="' + cipherAlpha + '"');
+        l.push('local ' + vLut + '={}');
+        var lutLoopVar = Math.floor(rng() * 2);
+        if (lutLoopVar === 0) {
+            l.push('for _i=1,64 do ' + vLut + '[' + vSb + '(' + vAlpha + ',_i)]=_i-1 end');
+        } else {
+            var _n = randomName(2);
+            l.push('local ' + _n + '=#' + vAlpha);
+            l.push('for _i=1,' + _n + ' do ' + vLut + '[' + vSb + '(' + vAlpha + ',_i)]=_i-1 end');
+        }
+        return l;
+    };
+
+    var buildSbox = function() {
+        var l = [];
+        l.push('local ' + vSbox + '={}');
+        var chunkOrder = [0, 1, 2, 3];
+        for (var i = chunkOrder.length - 1; i > 0; i--) {
+            var j = Math.floor(rng() * (i + 1));
+            var tmp = chunkOrder[i]; chunkOrder[i] = chunkOrder[j]; chunkOrder[j] = tmp;
+        }
+        var chunkStyle = Math.floor(rng() * 2);
+        for (var ci = 0; ci < chunkOrder.length; ci++) {
+            var idx = chunkOrder[ci];
+            var offset = idx * chunkSz;
+            if (chunkStyle === 0) {
+                l.push('do local _t={' + isboxChunks[idx] + '} for _i=1,' + chunkSz + ' do ' + vSbox + '[' + offset + '+_i-1]=_t[_i] end end');
+            } else {
+                var vals = isbox.slice(idx * chunkSz, (idx + 1) * chunkSz);
+                var assignments = [];
+                for (var vi = 0; vi < vals.length; vi++) {
+                    assignments.push(vSbox + '[' + (offset + vi) + ']=' + vals[vi]);
+                }
+                var batchSz = 8 + Math.floor(rng() * 9);
+                for (var bi = 0; bi < assignments.length; bi += batchSz) {
+                    l.push(assignments.slice(bi, bi + batchSz).join("\n"));
+                }
+            }
+            if (rng() > 0.7) l.push(junkLine());
+        }
+        return l;
+    };
+
+    var buildFrags = function() {
+        var l = [];
+        var fragStyle = Math.floor(rng() * 2);
+        if (fragStyle === 0) {
+            l.push('local ' + vFt + '={}');
+            var declOrder = [];
+            for (var i = 0; i < nFrags; i++) declOrder.push(i);
+            for (var i = declOrder.length - 1; i > 0; i--) {
+                var j = Math.floor(rng() * (i + 1));
+                var tmp = declOrder[i]; declOrder[i] = declOrder[j]; declOrder[j] = tmp;
+            }
+            for (var di = 0; di < declOrder.length; di++) {
+                var idx = declOrder[di];
+                l.push(vFt + '[' + (idx + 1) + ']="' + frags[idx] + '"');
+                if (rng() > 0.8) l.push(junkLine());
+            }
+            l.push('local ' + vData + '=' + vTc + '(' + vFt + ')');
+        } else {
+            var fragVars = [];
+            var declOrder = [];
+            for (var i = 0; i < nFrags; i++) declOrder.push(i);
+            for (var i = declOrder.length - 1; i > 0; i--) {
+                var j = Math.floor(rng() * (i + 1));
+                var tmp = declOrder[i]; declOrder[i] = declOrder[j]; declOrder[j] = tmp;
+            }
+            for (var di = 0; di < declOrder.length; di++) {
+                var idx = declOrder[di];
+                var fv = randomName(3);
+                fragVars[idx] = fv;
+                l.push('local ' + fv + '="' + frags[idx] + '"');
+                if (rng() > 0.8) l.push(junkLine());
+            }
+            l.push('local ' + vData + '=' + fragVars.join('..'));
+        }
+        return l;
+    };
+
+    var sections = [buildLut, buildSbox, buildFrags];
+    for (var i = sections.length - 1; i > 0; i--) {
+        var j = Math.floor(rng() * (i + 1));
+        var tmp = sections[i]; sections[i] = sections[j]; sections[j] = tmp;
+    }
+    for (var si = 0; si < sections.length; si++) {
+        lines.push.apply(lines, sections[si]());
+        maybeJunk(lines);
+    }
+
+    maybeJunk(lines);
+    var b64Variant = Math.floor(rng() * 2);
+    lines.push('local ' + vDec + '={}');
+    if (b64Variant === 0) {
+        var _li = randomName(2);
+        lines.push('for ' + _li + '=1,#' + vData + ',4 do');
+        lines.push('local _a,_b,_c,_d=' + vLut + '[' + vSb + '(' + vData + ',' + _li + ')],' + vLut + '[' + vSb + '(' + vData + ',' + _li + '+1)],' + vLut + '[' + vSb + '(' + vData + ',' + _li + '+2)],' + vLut + '[' + vSb + '(' + vData + ',' + _li + '+3)]');
+        lines.push(vDec + '[#' + vDec + '+1]=' + vB32 + '.bor(' + vB32 + '.lshift(_a,2),' + vB32 + '.rshift(_b,4))');
+        lines.push('if _c then ' + vDec + '[#' + vDec + '+1]=' + vB32 + '.band(' + vB32 + '.bor(' + vB32 + '.lshift(_b,4),' + vB32 + '.rshift(_c,2)),0xFF) end');
+        lines.push('if _d then ' + vDec + '[#' + vDec + '+1]=' + vB32 + '.band(' + vB32 + '.bor(' + vB32 + '.lshift(_c,6),_d),0xFF) end');
+        lines.push('end');
+    } else {
+        var _li = randomName(2);
+        var _n = randomName(2);
+        lines.push('local ' + _n + '=0');
+        lines.push('for ' + _li + '=1,#' + vData + ',4 do');
+        lines.push('local _a,_b,_c,_d=' + vLut + '[' + vSb + '(' + vData + ',' + _li + ')],' + vLut + '[' + vSb + '(' + vData + ',' + _li + '+1)],' + vLut + '[' + vSb + '(' + vData + ',' + _li + '+2)],' + vLut + '[' + vSb + '(' + vData + ',' + _li + '+3)]');
+        lines.push(_n + '=' + _n + '+1');
+        lines.push(vDec + '[' + _n + ']=' + vB32 + '.bor(' + vB32 + '.lshift(_a,2),' + vB32 + '.rshift(_b,4))');
+        lines.push('if _c then ' + _n + '=' + _n + '+1 ' + vDec + '[' + _n + ']=' + vB32 + '.band(' + vB32 + '.bor(' + vB32 + '.lshift(_b,4),' + vB32 + '.rshift(_c,2)),0xFF) end');
+        lines.push('if _d then ' + _n + '=' + _n + '+1 ' + vDec + '[' + _n + ']=' + vB32 + '.band(' + vB32 + '.bor(' + vB32 + '.lshift(_c,6),_d),0xFF) end');
+        lines.push('end');
+    }
+
+    maybeJunk(lines);
+    var decryptVariant = Math.floor(rng() * 2);
+    lines.push('local ' + vOut + '={}');
+    lines.push('local ' + vPk + '=' + posSeed);
+    if (decryptVariant === 0) {
+        var _li = randomName(2);
+        lines.push('for ' + _li + '=1,#' + vDec + ' do');
+        lines.push(vOut + '[' + _li + ']=' + vSc + '(' + vB32 + '.bxor(' + vSbox + '[' + vDec + '[' + _li + ']],' + vPk + '))');
+        lines.push(vPk + '=' + vB32 + '.band(' + vPk + '+' + posStep + ',0xFF)');
+        lines.push('end');
+    } else {
+        var _tmp = randomName(3);
+        var _li = randomName(2);
+        lines.push('local ' + _tmp + '={}');
+        lines.push('for ' + _li + '=1,#' + vDec + ' do');
+        lines.push(_tmp + '[' + _li + ']=' + vB32 + '.bxor(' + vSbox + '[' + vDec + '[' + _li + ']],' + vPk + ')');
+        lines.push(vPk + '=' + vB32 + '.band(' + vPk + '+' + posStep + ',0xFF)');
+        lines.push('end');
+        maybeJunk(lines);
+        var _li2 = randomName(2);
+        lines.push('for ' + _li2 + '=1,#' + _tmp + ' do ' + vOut + '[' + _li2 + ']=' + vSc + '(' + _tmp + '[' + _li2 + ']) end');
+    }
+
+    maybeJunk(lines);
+    var _liS = randomName(2);
+    lines.push('local ' + vSkip + '=' + vSb + '(' + vOut + ',1)+1');
+    lines.push('local ' + vReal + '={}');
+    lines.push('for ' + _liS + '=' + vSkip + '+1,#' + vOut + ' do ' + vReal + '[#' + vReal + '+1]=' + vOut + '[' + _liS + '] end');
+    maybeJunk(lines);
+    var execVariant = Math.floor(rng() * 3);
+    if (execVariant === 0) {
+        lines.push('(' + vLd + '(' + vTc + '(' + vReal + ')))()');
+    } else if (execVariant === 1) {
+        var _fn = randomName(3);
+        lines.push('local ' + _fn + '=' + vLd + '(' + vTc + '(' + vReal + '))');
+        lines.push(_fn + '()');
+    } else {
+        var _src = randomName(3);
+        var _fn = randomName(3);
+        lines.push('local ' + _src + '=' + vTc + '(' + vReal + ')');
+        lines.push('local ' + _fn + '=' + vLd + '(' + _src + ')');
+        lines.push(_fn + '()');
+    }
+    return lines.join("\n");
+}
+
+function buildNestedVM(source) {
+    var srcBytes = toUTF8Bytes(source);
+    var prefixLen = 20 + Math.floor(rng() * 44);
+    var plainBytes = [prefixLen & 0xFF];
+    for (var i = 0; i < prefixLen; i++) plainBytes.push(Math.floor(rng() * 256));
+    for (var i = 0; i < srcBytes.length; i++) plainBytes.push(srcBytes[i]);
+
+    var nKeys = 2 + Math.floor(rng() * 2);
+    var xKeys = [], xSteps = [];
+    for (var i = 0; i < nKeys; i++) {
+        xKeys.push((Math.floor(rng() * 254) + 1) & 0xFF);
+        xSteps.push((Math.floor(rng() * 30) + 3) & 0xFF);
+    }
+    var afterXor = [];
+    var rk = xKeys.slice();
+    for (var i = 0; i < plainBytes.length; i++) {
+        var b = plainBytes[i];
+        for (var k = 0; k < nKeys; k++) {
+            b = (b ^ rk[k]) & 0xFF;
+            rk[k] = (rk[k] + xSteps[k]) & 0xFF;
+        }
+        afterXor.push(b);
+    }
+
+    var rotKey = (Math.floor(rng() * 200) + 10) & 0xFF;
+    var encBytes = [];
+    for (var i = 0; i < afterXor.length; i++) {
+        encBytes.push((afterXor[i] + rotKey) & 0xFF);
+    }
+
+    var stdAlpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    var alphaArr = stdAlpha.split('');
+    for (var i = alphaArr.length - 1; i > 0; i--) {
+        var j = Math.floor(rng() * (i + 1));
+        var tmp = alphaArr[i]; alphaArr[i] = alphaArr[j]; alphaArr[j] = tmp;
+    }
+    var alpha = alphaArr.join('');
+
+    var encoded = "";
+    for (var i = 0; i < encBytes.length; i += 3) {
+        var b0 = encBytes[i], b1 = encBytes[i + 1] || 0, b2 = encBytes[i + 2] || 0;
+        encoded += alpha[(b0 >> 2) & 0x3F];
+        encoded += alpha[((b0 << 4) | (b1 >> 4)) & 0x3F];
+        encoded += (i + 1 < encBytes.length) ? alpha[((b1 << 2) | (b2 >> 6)) & 0x3F] : "=";
+        encoded += (i + 2 < encBytes.length) ? alpha[b2 & 0x3F] : "=";
+    }
+
+    var nAlphaFrags = 6 + Math.floor(rng() * 3);
+    var alphaFragSz = Math.ceil(64 / nAlphaFrags);
+    var alphaFragKeys = [];
+    var alphaFragData = [];
+    for (var i = 0; i < nAlphaFrags; i++) {
+        var fk = (Math.floor(rng() * 254) + 1) & 0xFF;
+        alphaFragKeys.push(fk);
+        var start = i * alphaFragSz;
+        var end = Math.min((i + 1) * alphaFragSz, 64);
+        var piece = alpha.slice(start, end);
+        var enc = [];
+        for (var j = 0; j < piece.length; j++) {
+            enc.push((piece.charCodeAt(j) ^ fk) & 0xFF);
+        }
+        alphaFragData.push(enc);
+    }
+
+    var nDataFrags = 5 + Math.floor(rng() * 4);
+    var dataFragSz = Math.ceil(encoded.length / nDataFrags);
+    var dataFrags = [];
+    for (var i = 0; i < nDataFrags; i++) dataFrags.push(encoded.slice(i * dataFragSz, (i + 1) * dataFragSz));
+
+    var nn = function(len) { return randomName(len || 4); };
+    var vSc = nn(3), vSb = nn(3), vEnv = nn(3), vTc = nn(3), vLd = nn(3), vB32 = nn(3);
+    var vBxor = nn(3), vBand = nn(3), vBor = nn(3), vLsh = nn(3), vRsh = nn(3);
+    var vAlpha = nn(4), vLut = nn(3), vData = nn(3), vDec = nn(3), vOut = nn(3);
+
+    var rInt = function() {
+        var v = Math.floor(rng() * 0xFFFF);
+        var fmt = Math.floor(rng() * 4);
+        if (fmt === 0) return '0x' + Math.abs(v).toString(16).toUpperCase();
+        if (fmt === 1) return '0b' + Math.abs(v).toString(2);
+        if (fmt === 2) return Math.floor(v/1000) + '_' + String(v%1000).padStart(3,'0');
+        return String(v);
+    };
+
+    var rSpecStr = function() {
+        var chars = '!@#$%^&*()_+-=[]{}|;:<>?,./~`';
+        var len = 3 + Math.floor(rng() * 8);
+        var s = '';
+        for (var i = 0; i < len; i++) s += chars[Math.floor(rng() * chars.length)];
+        return s;
+    };
+
+    var emitHoneypot = function() {
+        var hv1 = nn(2), hv2 = nn(2);
+        var variant = Math.floor(rng() * 14);
+        switch (variant) {
+            case 0: return 'local ' + hv1 + '=' + rInt() + ' while true do ' + hv1 + '=' + vBxor + '(' + hv1 + ',' + rInt() + ') break end';
+            case 1: return 'do local ' + hv1 + '=' + rInt() + ' if ' + hv1 + '>' + rInt() + ' then ' + hv1 + '=' + hv1 + '-' + rInt() + ' else ' + hv1 + '=' + hv1 + '+' + rInt() + ' end end';
+            case 2: return 'local ' + hv1 + '=' + rInt() + ' local ' + hv2 + '=0 repeat ' + hv1 + '=(' + hv1 + '+' + rInt() + ')%65536 ' + hv2 + '=' + hv2 + '+1 until ' + hv2 + '>=' + (2+Math.floor(rng()*4)) + ' end';
+            case 3: {
+                var _len3 = 3+Math.floor(rng()*5);
+                var _arr3 = [];
+                for (var _ai = 0; _ai < _len3; _ai++) _arr3.push(rInt());
+                return 'local ' + hv1 + '={' + _arr3.join(',') + '} do local ' + hv2 + '=0 for _=1,#' + hv1 + ' do ' + hv2 + '=' + hv2 + '+' + hv1 + '[_] end end';
+            }
+            case 4: return 'local ' + hv1 + '="' + rSpecStr() + '" local ' + hv2 + '=0 for _=1,#' + hv1 + ' do ' + hv2 + '=' + vBxor + '(' + hv2 + ',' + vSb + '(' + hv1 + ',_)) end';
+            case 5: return 'do local ' + hv1 + '=' + rInt() + ' for ' + hv2 + '=1,' + (2+Math.floor(rng()*4)) + ' do ' + hv1 + '=(' + hv1 + '*3+' + hv2 + ')%0x10000 end end';
+            case 6: return 'local ' + hv1 + '=' + rInt() + ' if ' + hv1 + '>' + rInt() + ' then while true do ' + hv1 + '=' + vBand + '(' + hv1 + ',' + rInt() + ') break end else ' + hv1 + '=' + vBor + '(' + hv1 + ',' + rInt() + ') end';
+            case 7: return 'local ' + hv1 + '=' + rInt() + ' local ' + hv2 + '=' + rInt() + ' if ' + hv1 + '<' + hv2 + ' then ' + hv1 + '=' + hv2 + '-' + hv1 + ' else ' + hv2 + '=' + hv1 + '-' + hv2 + ' end ' + hv1 + '=(' + hv1 + '+' + hv2 + ')%65536';
+            case 8: return 'do local ' + hv1 + '="' + rSpecStr() + '" local ' + hv2 + '=' + rInt() + ' for _=1,#' + hv1 + ' do ' + hv2 + '=(' + hv2 + '+' + vSb + '(' + hv1 + ',_))%0x10000 end end';
+            case 9: return 'local ' + hv1 + '={} for ' + hv2 + '=1,' + (2+Math.floor(rng()*3)) + ' do ' + hv1 + '[' + hv2 + ']=' + vBxor + '(' + rInt() + ',' + hv2 + ') end';
+            case 10: {
+                var d = 2+Math.floor(rng()*3);
+                var s = 'local ' + hv1 + '=' + rInt() + ' ';
+                for(var i=0;i<d;i++) s += 'if ' + hv1 + '>' + rInt() + ' then ' + hv1 + '=' + hv1 + '-' + rInt() + ' else ';
+                s += hv1 + '=' + hv1 + '+' + rInt() + ' ';
+                for(var i=0;i<d;i++) s += 'end ';
+                return s;
+            }
+            case 11: {
+                var _cnt11 = 2+Math.floor(rng()*3);
+                return 'local ' + hv1 + '=' + rInt() + ' local ' + hv2 + '=' + rInt() + ' for _=1,' + _cnt11 + ' do ' + hv1 + '=' + vBxor + '(' + hv1 + ',' + vBand + '(' + hv2 + '+_,0xFFFF)) end';
+            }
+            case 12: {
+                return 'local ' + hv1 + '=' + rInt() + ' repeat ' + hv1 + '=' + vBxor + '(' + hv1 + ',' + rInt() + ') if ' + hv1 + '>' + rInt() + ' then ' + hv1 + '=' + vBand + '(' + hv1 + ',' + rInt() + ') end break end';
+            }
+            case 13: return 'local ' + hv1 + '=' + rInt() + ' for ' + hv2 + '=1,' + (1+Math.floor(rng()*3)) + ' do if ' + hv2 + '%2==0 then ' + hv1 + '=' + vBxor + '(' + hv1 + ',' + hv2 + ') else ' + hv1 + '=' + vBand + '(' + hv1 + '+' + hv2 + ',0xFFFF) end end';
+            default: return 'local ' + hv1 + '=' + rInt();
+        }
+    };
+
+    var opaquePred = function() {
+        var preds = [
+            'type("")=="string"', 'type(1)=="number"', 'type({})=="table"',
+            '1+1==2', '#""==0', 'type(true)=="boolean"', 'not(1>2)'
+        ];
+        return preds[Math.floor(rng() * preds.length)];
+    };
+
+    var encSC = function(s) {
+        var bytes = [];
+        for (var i = 0; i < s.length; i++) bytes.push(s.charCodeAt(i));
+        return bytes.join(',');
+    };
+
+    var L = [];
+    var bootV = Math.floor(rng() * 3);
+    if (bootV === 0) {
+        L.push('local ' + vSc + '=("")[("\\99\\104\\97\\114")]');
+        L.push('local ' + vSb + '=("")[("\\98\\121\\116\\101")]');
+    } else if (bootV === 1) {
+        L.push('local ' + vSb + '=("")[("\\98\\121\\116\\101")]');
+        L.push('local ' + vSc + '=("")[("\\99\\104\\97\\114")]');
+    } else {
+        var mt = nn(2);
+        L.push('local ' + mt + '=("")[("\\115\\117\\98")]');
+        L.push('local ' + vSc + '=("")[("\\99\\104\\97\\114")]');
+        L.push('local ' + vSb + '=("")[("\\98\\121\\116\\101")]');
+    }
+    L.push(emitHoneypot());
+
+    L.push('local ' + vEnv + '=(type(getfenv)=="function" and getfenv(0) or _G)');
+    var builtins = [
+        'local ' + vTc + '=' + vEnv + '[' + vSc + '(' + encSC('table') + ')][' + vSc + '(' + encSC('concat') + ')]',
+        'local ' + vLd + '=' + vEnv + '[' + vSc + '(' + encSC('loadstring') + ')] or ' + vEnv + '[' + vSc + '(' + encSC('load') + ')]',
+        'local ' + vB32 + '=' + vEnv + '[' + vSc + '(' + encSC('bit32') + ')]',
+    ];
+    for (var i = builtins.length - 1; i > 0; i--) {
+        var j = Math.floor(rng() * (i + 1));
+        var tmp = builtins[i]; builtins[i] = builtins[j]; builtins[j] = tmp;
+    }
+    for (var bi = 0; bi < builtins.length; bi++) {
+        L.push(builtins[bi]);
+        if (rng() > 0.6) L.push(emitHoneypot());
+    }
+    var b32methods = [
+        [vBxor, 'bxor'], [vBand, 'band'], [vBor, 'bor'], [vLsh, 'lshift'], [vRsh, 'rshift']
+    ];
+    for (var i = b32methods.length - 1; i > 0; i--) {
+        var j = Math.floor(rng() * (i + 1));
+        var tmp = b32methods[i]; b32methods[i] = b32methods[j]; b32methods[j] = tmp;
+    }
+    for (var i = 0; i < b32methods.length; i++) {
+        L.push('local ' + b32methods[i][0] + '=' + vB32 + '[' + vSc + '(' + encSC(b32methods[i][1]) + ')]');
+    }
+    L.push(emitHoneypot());
+    L.push(emitHoneypot());
+
+    var alphaFragVars = [];
+    for (var i = 0; i < nAlphaFrags; i++) alphaFragVars.push(nn(3));
+    var alphaOrder = [];
+    for (var i = 0; i < nAlphaFrags; i++) alphaOrder.push(i);
+    for (var i = alphaOrder.length - 1; i > 0; i--) {
+        var j = Math.floor(rng() * (i + 1));
+        var tmp = alphaOrder[i]; alphaOrder[i] = alphaOrder[j]; alphaOrder[j] = tmp;
+    }
+    L.push(emitHoneypot());
+    for (var ai = 0; ai < alphaOrder.length; ai++) {
+        var idx = alphaOrder[ai];
+        L.push('local ' + alphaFragVars[idx] + '={' + alphaFragData[idx].join(',') + '}');
+        if (rng() > 0.5) L.push(emitHoneypot());
+    }
+
+    L.push('local ' + vAlpha + '=""');
+    for (var i = 0; i < nAlphaFrags; i++) {
+        var lv = nn(2);
+        if (rng() > 0.5) {
+            L.push('if ' + opaquePred() + ' then for ' + lv + '=1,#' + alphaFragVars[i] + ' do ' + vAlpha + '=' + vAlpha + '..' + vSc + '(' + vBxor + '(' + alphaFragVars[i] + '[' + lv + '],' + alphaFragKeys[i] + ')) end end');
+        } else {
+            L.push('for ' + lv + '=1,#' + alphaFragVars[i] + ' do ' + vAlpha + '=' + vAlpha + '..' + vSc + '(' + vBxor + '(' + alphaFragVars[i] + '[' + lv + '],' + alphaFragKeys[i] + ')) end');
+        }
+        if (rng() > 0.65) L.push(emitHoneypot());
+    }
+
+    L.push('local ' + vLut + '={}');
+    var lutV = nn(2);
+    L.push('for ' + lutV + '=1,#' + vAlpha + ' do ' + vLut + '[' + vSb + '(' + vAlpha + ',' + lutV + ')]=' + lutV + '-1 end');
+    L.push(emitHoneypot());
+
+    var dataFragVars = [];
+    for (var i = 0; i < nDataFrags; i++) dataFragVars.push(nn(3));
+    var dataOrder = [];
+    for (var i = 0; i < nDataFrags; i++) dataOrder.push(i);
+    for (var i = dataOrder.length - 1; i > 0; i--) {
+        var j = Math.floor(rng() * (i + 1));
+        var tmp = dataOrder[i]; dataOrder[i] = dataOrder[j]; dataOrder[j] = tmp;
+    }
+    for (var di = 0; di < dataOrder.length; di++) {
+        var idx = dataOrder[di];
+        L.push('local ' + dataFragVars[idx] + '="' + dataFrags[idx] + '"');
+        if (rng() > 0.65) L.push(emitHoneypot());
+    }
+
+    var concatV = Math.floor(rng() * 2);
+    if (concatV === 0) {
+        L.push('local ' + vData + '=' + dataFragVars.join('..'));
+    } else {
+        var tbl = nn(3);
+        L.push('local ' + tbl + '={' + dataFragVars.join(',') + '}');
+        L.push('local ' + vData + '=' + vTc + '(' + tbl + ')');
+    }
+    L.push(emitHoneypot());
+
+    L.push('local ' + vDec + '={}');
+    var b64Li = nn(2);
+    var b64V = Math.floor(rng() * 2);
+    if (b64V === 0) {
+        L.push('for ' + b64Li + '=1,#' + vData + ',4 do');
+        L.push('local _a,_b,_c,_d=' + vLut + '[' + vSb + '(' + vData + ',' + b64Li + ')],' + vLut + '[' + vSb + '(' + vData + ',' + b64Li + '+1)],' + vLut + '[' + vSb + '(' + vData + ',' + b64Li + '+2)],' + vLut + '[' + vSb + '(' + vData + ',' + b64Li + '+3)]');
+        L.push(vDec + '[#' + vDec + '+1]=' + vBor + '(' + vLsh + '(_a,2),' + vRsh + '(_b,4))');
+        L.push('if _c then ' + vDec + '[#' + vDec + '+1]=' + vBand + '(' + vBor + '(' + vLsh + '(_b,4),' + vRsh + '(_c,2)),0xFF) end');
+        L.push('if _d then ' + vDec + '[#' + vDec + '+1]=' + vBand + '(' + vBor + '(' + vLsh + '(_c,6),_d),0xFF) end');
+        L.push('end');
+    } else {
+        var cnt = nn(2);
+        L.push('local ' + cnt + '=0');
+        L.push('for ' + b64Li + '=1,#' + vData + ',4 do');
+        L.push('local _a,_b,_c,_d=' + vLut + '[' + vSb + '(' + vData + ',' + b64Li + ')],' + vLut + '[' + vSb + '(' + vData + ',' + b64Li + '+1)],' + vLut + '[' + vSb + '(' + vData + ',' + b64Li + '+2)],' + vLut + '[' + vSb + '(' + vData + ',' + b64Li + '+3)]');
+        L.push(cnt + '=' + cnt + '+1');
+        L.push(vDec + '[' + cnt + ']=' + vBor + '(' + vLsh + '(_a,2),' + vRsh + '(_b,4))');
+        L.push('if _c then ' + cnt + '=' + cnt + '+1 ' + vDec + '[' + cnt + ']=' + vBand + '(' + vBor + '(' + vLsh + '(_b,4),' + vRsh + '(_c,2)),0xFF) end');
+        L.push('if _d then ' + cnt + '=' + cnt + '+1 ' + vDec + '[' + cnt + ']=' + vBand + '(' + vBor + '(' + vLsh + '(_c,6),_d),0xFF) end');
+        L.push('end');
+    }
+    L.push(emitHoneypot());
+
+    var rotLi = nn(2);
+    var rotKv = nn(3);
+    var rotBase = Math.floor(rng() * 200);
+    var rotDelta = rotKey - rotBase;
+    if (rng() > 0.5) {
+        L.push('local ' + rotKv + '=' + rotBase + ' ' + rotKv + '=' + rotKv + '+' + rotDelta);
+    } else {
+        var rotA = nn(2), rotB = nn(2);
+        var a = Math.floor(rng() * 200) + 50, b = rotKey - a;
+        L.push('local ' + rotA + '=' + a + ' local ' + rotB + '=' + (b < 0 ? '(0-' + (-b) + ')' : String(b)));
+        L.push('local ' + rotKv + '=' + rotA + '+' + rotB);
+    }
+    L.push('for ' + rotLi + '=1,#' + vDec + ' do ' + vDec + '[' + rotLi + ']=' + vBand + '(' + vDec + '[' + rotLi + ']-' + rotKv + '+256,0xFF) end');
+    L.push(emitHoneypot());
+
+    for (var k = 0; k < nKeys; k++) {
+        var rkVar = nn(2), decLi = nn(2);
+        var kBase = Math.floor(rng() * 100);
+        var kDelta = xKeys[k] - kBase;
+        if (rng() > 0.5) {
+            L.push('do local ' + rkVar + '=' + kBase + '+' + kDelta);
+        } else {
+            var kMul = 2 + Math.floor(rng() * 5);
+            var kSrc = Math.floor(xKeys[k] / kMul);
+            var kRem = xKeys[k] - kSrc * kMul;
+            L.push('do local ' + rkVar + '=' + kSrc + '*' + kMul + '+' + kRem);
+        }
+        L.push('for ' + decLi + '=1,#' + vDec + ' do ' + vDec + '[' + decLi + ']=' + vBxor + '(' + vDec + '[' + decLi + '],' + rkVar + ') ' + rkVar + '=' + vBand + '(' + rkVar + '+' + xSteps[k] + ',0xFF) end');
+        L.push('end');
+        if (rng() > 0.4) L.push(emitHoneypot());
+    }
+
+    L.push(emitHoneypot());
+    var vSkip = nn(2);
+    L.push('local ' + vSkip + '=' + vDec + '[1]+1');
+    L.push('local ' + vOut + '={}');
+    var sLi = nn(2);
+    L.push('for ' + sLi + '=' + vSkip + '+1,#' + vDec + ' do ' + vOut + '[#' + vOut + '+1]=' + vSc + '(' + vDec + '[' + sLi + ']) end');
+    L.push(emitHoneypot());
+
+    var execV = Math.floor(rng() * 3);
+    if (execV === 0) {
+        L.push('(' + vLd + '(' + vTc + '(' + vOut + ')))()');
+    } else if (execV === 1) {
+        var fn = nn(3);
+        L.push('local ' + fn + '=' + vLd + '(' + vTc + '(' + vOut + '))');
+        L.push(fn + '()');
+    } else {
+        var srcV = nn(3), fn = nn(3);
+        L.push('local ' + srcV + '=' + vTc + '(' + vOut + ')');
+        L.push('local ' + fn + '=' + vLd + '(' + srcV + ')');
+        L.push(fn + '()');
+    }
+    return L.join("\n");
+}
+
+function buildStubVM(source) {
+    var srcBytes = toUTF8Bytes(source);
+    var compressed = lzssCompress(srcBytes);
+    var stdAlpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    var aa = stdAlpha.split('');
+    for (var i = aa.length - 1; i > 0; i--) {
+        var j = Math.floor(rng() * (i + 1));
+        var tmp = aa[i]; aa[i] = aa[j]; aa[j] = tmp;
+    }
+    var shuffledAlpha = aa.join('');
+
+    var encVariant = Math.floor(rng() * 4);
+    var keyDerivVariant = Math.floor(rng() * 4);
+    var stubKey = 0;
+    for (var i = 0; i < shuffledAlpha.length; i++) {
+        var b = shuffledAlpha.charCodeAt(i);
+        if (keyDerivVariant === 0) stubKey = (stubKey ^ b) & 0xFF;
+        else if (keyDerivVariant === 1) stubKey = (stubKey + b) & 0xFF;
+        else if (keyDerivVariant === 2) stubKey = ((stubKey * 31 + b) & 0xFF) | 0;
+        else stubKey = (i & 1) === 0 ? ((stubKey ^ b) & 0xFF) : ((stubKey + b) & 0xFF);
+    }
+    stubKey = stubKey || 1;
+    var rollingStep = (Math.floor(rng() * 30) + 3) & 0xFF;
+    var encrypted = [];
+    var rk = stubKey;
+    for (var i = 0; i < compressed.length; i++) {
+        var b = compressed[i];
+        if (encVariant === 0) encrypted.push((b ^ stubKey) & 0xFF);
+        else if (encVariant === 1) encrypted.push((b + stubKey) & 0xFF);
+        else if (encVariant === 2) encrypted.push((256 + b - stubKey) & 0xFF);
+        else { encrypted.push((b ^ rk) & 0xFF); rk = (rk + rollingStep) & 0xFF; }
+    }
+
+    var encoded = "";
+    for (var i = 0; i < encrypted.length; i += 3) {
+        var b0 = encrypted[i], b1 = encrypted[i+1] || 0, b2 = encrypted[i+2] || 0;
+        encoded += shuffledAlpha[(b0 >> 2) & 0x3F];
+        encoded += shuffledAlpha[((b0 << 4) | (b1 >> 4)) & 0x3F];
+        encoded += (i+1 < encrypted.length) ? shuffledAlpha[((b1 << 2) | (b2 >> 6)) & 0x3F] : "=";
+        encoded += (i+2 < encrypted.length) ? shuffledAlpha[b2 & 0x3F] : "=";
+    }
+
+    var nFrags = 3 + Math.floor(rng() * 3);
+    var fragSz = Math.ceil(encoded.length / nFrags);
+    var frags = [];
+    for (var i = 0; i < nFrags; i++) frags.push(encoded.slice(i * fragSz, (i+1) * fragSz));
+
+    var n = function(len) { return randomName(len || 4); };
+    var a_sc = n(), a_sb = n(), a_bx = n(), a_ba = n(), a_bo = n(), a_bl = n(), a_br = n();
+    var a_tc = n(), a_ls = n(), a_d = n(), a_o = n(), a_t = n();
+    var b32v = n(), efv = n(3), pvv = n(3);
+    var a_lut = n(), a_abc = n(), a_ft = n(), a_s = n();
+    var fragVars = [];
+    for (var i = 0; i < nFrags; i++) fragVars.push(n());
+    var fk1 = n(), fk2 = n(), fk3 = n(), fk4 = n(), fk5 = n();
+    var cv = n(3);
+
+    var bootVariant = [0, 2, 3][Math.floor(rng() * 3)];
+    var combineVariant = Math.floor(rng() * 3);
+    var shiftVariant = Math.floor(rng() * 2);
+
+    var encStr = function(s) {
+        var parts = [];
+        for (var i = 0; i < s.length; i++) {
+            var v = s.charCodeAt(i);
+            parts.push('\\' + v.toString().padStart(3, '0'));
+        }
+        return parts.join('');
+    };
+    var encSC = function(s) {
+        var bytes = [];
+        for (var i = 0; i < s.length; i++) bytes.push(s.charCodeAt(i));
+        return bytes.join(',');
+    };
+
+    var L = [];
+    if (bootVariant === 0) {
+        L.push('local ' + a_sc + '=("")[("' + encStr('char') + '")]');
+        L.push('local ' + a_sb + '=("")[("' + encStr('byte') + '")]');
+    } else if (bootVariant === 2) {
+        var pf1 = n(3), pf2 = n(3);
+        L.push('local ' + pf1 + ',' + a_sc + '=pcall(function() return ("")[("' + encStr('char') + '")]end)');
+        L.push('local ' + pf2 + ',' + a_sb + '=pcall(function() return ("")[("' + encStr('byte') + '")]end)');
+    } else {
+        var tv = n(3);
+        L.push('local ' + tv + '={"\0"}');
+        L.push('local ' + a_sc + '=' + tv + '[1][("' + encStr('char') + '")]');
+        L.push('local ' + a_sb + '=' + tv + '[1][("' + encStr('byte') + '")]');
+    }
+
+    L.push('local ' + pvv + ',' + efv + '=pcall(getfenv,0)');
+    L.push('if not ' + pvv + ' then ' + efv + '=_G end');
+
+    L.push('local ' + b32v + '=' + efv + '[' + a_sc + '(' + encSC('bit32') + ')]');
+    var b32Methods = [
+        [a_bx, 'bxor'], [a_ba, 'band'], [a_bo, 'bor'], [a_bl, 'lshift'], [a_br, 'rshift']
+    ];
+    for (var i = b32Methods.length - 1; i > 0; i--) {
+        var j = Math.floor(rng() * (i + 1));
+        var tmp = b32Methods[i]; b32Methods[i] = b32Methods[j]; b32Methods[j] = tmp;
+    }
+    for (var i = 0; i < b32Methods.length; i++) {
+        L.push('local ' + b32Methods[i][0] + '=' + b32v + '[' + a_sc + '(' + encSC(b32Methods[i][1]) + ')]');
+    }
+    L.push('local ' + a_tc + '=' + efv + '[' + a_sc + '(' + encSC('table') + ')][' + a_sc + '(' + encSC('concat') + ')]');
+    L.push('local ' + a_ls + '=' + efv + '[' + a_sc + '(' + encSC('loadstring') + ')]or ' + efv + '[' + a_sc + '(' + encSC('load') + ')]');
+
+    var sigVar = n(3);
+    var tsVar = n(3);
+    L.push('local ' + tsVar + '=' + efv + '[' + a_sc + '(' + encSC('tostring') + ')]');
+    L.push('local ' + sigVar + '=' + tsVar + '(' + a_ls + ')');
+
+    var safeBaitChars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!#$%&()*+,-./:;<=>?@[]^ _`{|}~';
+    var fakeBait = '';
+    for (var i = 0; i < 48; i++) fakeBait += safeBaitChars[Math.floor(rng() * safeBaitChars.length)];
+    var fakeCheck1 = Math.floor(rng() * 0xFFFFFF);
+    L.push('local ' + fk1 + '="' + fakeBait + '"');
+    L.push('local ' + fk2 + '={}');
+    L.push('for _i=1,#' + fk1 + ' do ' + fk2 + '[_i]=' + a_bx + '(' + a_sb + '(' + fk1 + ',_i),' + a_ba + '(_i,0xFF)) end');
+    L.push('local ' + fk3 + '=0');
+    L.push('for _i=1,#' + fk2 + ' do ' + fk3 + '=' + fk3 + '+' + fk2 + '[_i] end');
+    L.push('if ' + fk3 + '==0x' + fakeCheck1.toString(16) + ' then ' + a_ls + '(' + a_tc + '(' + fk2 + '))() return end');
+
+    var declOrder = [];
+    for (var i = 0; i < nFrags; i++) declOrder.push(i);
+    for (var i = declOrder.length - 1; i > 0; i--) {
+        var j = Math.floor(rng() * (i + 1));
+        var tmp = declOrder[i]; declOrder[i] = declOrder[j]; declOrder[j] = tmp;
+    }
+    for (var di = 0; di < declOrder.length; di++) {
+        var idx = declOrder[di];
+        L.push('local ' + fragVars[idx] + '="' + frags[idx] + '"');
+    }
+
+    var fakeCheck2 = Math.floor(rng() * 0xFFFFFF);
+    L.push('local ' + fk4 + '=0');
+    L.push('for _i=1,#' + fragVars[0] + ' do ' + fk4 + '=' + a_bx + '(' + fk4 + ',' + a_sb + '(' + fragVars[0] + ',_i)) end');
+    L.push('if ' + fk4 + '==0x' + fakeCheck2.toString(16) + ' then local _z={} for _i=1,#' + fragVars[0] + ' do _z[_i]=' + a_sc + '(' + a_ba + '(' + a_bx + '(' + a_sb + '(' + fragVars[0] + ',_i),_i),0x7F)+1) end ' + a_ls + '(' + a_tc + '(_z))() return end');
+
+    L.push('local ' + a_s + '=' + fragVars.join('..'));
+
+    var alphaXorKey = 1 + Math.floor(rng() * 254);
+    var nAlphaPieces = 3 + Math.floor(rng() * 3);
+    var alphaPieceSize = Math.ceil(64 / nAlphaPieces);
+    var alphaPieceVars = [];
+
+    var alphaOrder = [];
+    for (var i = 0; i < nAlphaPieces; i++) alphaOrder.push(i);
+    for (var i = alphaOrder.length - 1; i > 0; i--) {
+        var j = Math.floor(rng() * (i + 1));
+        var tmp = alphaOrder[i]; alphaOrder[i] = alphaOrder[j]; alphaOrder[j] = tmp;
+    }
+    for (var p = 0; p < nAlphaPieces; p++) alphaPieceVars.push(n());
+    for (var pi = 0; pi < alphaOrder.length; pi++) {
+        var p = alphaOrder[pi];
+        var piece = shuffledAlpha.slice(p * alphaPieceSize, (p + 1) * alphaPieceSize);
+        var encrypted = [];
+        for (var j = 0; j < piece.length; j++) {
+            encrypted.push((piece.charCodeAt(j) ^ alphaXorKey) & 0xFF);
+        }
+        L.push('local ' + alphaPieceVars[p] + '={' + encrypted.join(',') + '}');
+    }
+
+    L.push('local ' + a_abc + '=""');
+    for (var p = 0; p < nAlphaPieces; p++) {
+        L.push('for _i=1,#' + alphaPieceVars[p] + ' do ' + a_abc + '=' + a_abc + '..' + a_sc + '(' + a_bx + '(' + alphaPieceVars[p] + '[_i],' + alphaXorKey + ')) end');
+    }
+
+    L.push('local ' + a_lut + '={}');
+    L.push('for _i=1,#' + a_abc + ' do ' + a_lut + '[' + a_sb + '(' + a_abc + ',_i)]=_i-1 end');
+
+    L.push('local ' + a_d + '={}');
+
+    var kv = n(3);
+    var keyTableVar = n(3);
+    var keyTableLen = 8 + Math.floor(rng() * 8);
+    var keyTableBytes = [];
+    var xorAcc = 0;
+    for (var i = 0; i < keyTableLen - 1; i++) {
+        var b = Math.floor(rng() * 256);
+        keyTableBytes.push(b);
+        xorAcc = (xorAcc ^ b) & 0xFF;
+    }
+    keyTableBytes.push((xorAcc ^ stubKey) & 0xFF);
+    L.push('local ' + keyTableVar + '={' + keyTableBytes.join(',') + '}');
+    L.push('local ' + kv + '=0 for _i=1,#' + keyTableVar + ' do ' + kv + '=' + a_bx + '(' + kv + ',' + keyTableVar + '[_i]) end');
+    L.push(kv + '=' + a_ba + '(' + kv + ',0xFF)');
+    L.push('if ' + kv + '==0 then ' + kv + '=1 end');
+    if (encVariant === 3) {
+        L.push('local _dk=' + kv);
+        L.push('local _ds=' + rollingStep);
+    }
+
+    L.push('for _i=1,#' + a_s + ',4 do');
+    L.push('local _a,_b2,_c,_e=' + a_sb + '(' + a_s + ',_i,_i+3)');
+    L.push('_a=' + a_lut + '[_a]or 0');
+    L.push('_b2=' + a_lut + '[_b2]or 0');
+    L.push('_c=' + a_lut + '[_c]or 0');
+    L.push('_e=' + a_lut + '[_e]or 0');
+
+    var shl = function(x, amt) {
+        return shiftVariant === 0 ? a_bl + '(' + x + ',' + amt + ')' : '(' + x + '*' + (1 << amt) + ')';
+    };
+    var combine = function(x, y) {
+        if (combineVariant === 0) return a_bo + '(' + x + ',' + y + ')';
+        if (combineVariant === 1) return '(' + x + '+' + y + ')';
+        return a_bx + '(' + x + ',' + y + ')';
+    };
+    var b1 = a_ba + '(' + combine(shl('_a',2), a_br + '(_b2,4)') + ',0xFF)';
+    var b2 = a_ba + '(' + combine(shl('_b2',4), a_br + '(_c,2)') + ',0xFF)';
+    var b3 = a_ba + '(' + combine(shl('_c',6), '_e') + ',0xFF)';
+
+    var dk = function(expr) {
+        if (encVariant === 0) return a_bx + '(' + expr + ',' + kv + ')';
+        if (encVariant === 1) return a_ba + '((' + expr + '-' + kv + '+256),0xFF)';
+        if (encVariant === 2) return a_ba + '((' + expr + '+' + kv + '),0xFF)';
+        return a_bx + '(' + expr + ',_dk)';
+    };
+
+    if (encVariant === 3) {
+        L.push(a_d + '[#' + a_d + '+1]=' + dk(b1) + ' _dk=' + a_ba + '((_dk+_ds),0xFF)');
+        L.push('if ' + a_sb + '(' + a_s + ',_i+2)~=61 then ' + a_d + '[#' + a_d + '+1]=' + dk(b2) + ' _dk=' + a_ba + '((_dk+_ds),0xFF) end');
+        L.push('if ' + a_sb + '(' + a_s + ',_i+3)~=61 then ' + a_d + '[#' + a_d + '+1]=' + dk(b3) + ' _dk=' + a_ba + '((_dk+_ds),0xFF) end');
+    } else {
+        L.push(a_d + '[#' + a_d + '+1]=' + dk(b1));
+        L.push('if ' + a_sb + '(' + a_s + ',_i+2)~=61 then ' + a_d + '[#' + a_d + '+1]=' + dk(b2) + ' end');
+        L.push('if ' + a_sb + '(' + a_s + ',_i+3)~=61 then ' + a_d + '[#' + a_d + '+1]=' + dk(b3) + ' end');
+    }
+    L.push('end');
+
+    var lzssVariant = Math.floor(rng() * 3);
+    var encVariant2 = Math.floor(rng() * 3);
+    var useCounter = rng() > 0.5;
+
+    var _lp = n(3), _lf = n(3), _lb = n(2), _lm = n(2), _lc = n(3);
+    var _lv = n(3), _loff = n(2), _lln = n(2), _lj = n(2), _lsz = n(2);
+
+    L.push('local ' + a_o + '={}');
+    L.push('local ' + _lp + '=1');
+    if (useCounter) L.push('local ' + _lc + '=0');
+
+    L.push('while ' + _lp + '<=#' + a_d + ' do');
+    L.push('local ' + _lf + '=' + a_d + '[' + _lp + ']');
+    L.push(_lp + '=' + _lp + '+1');
+
+    if (lzssVariant === 0) {
+        L.push('for ' + _lb + '=0,7 do');
+    } else if (lzssVariant === 1) {
+        L.push('local ' + _lb + '=0');
+        L.push('local ' + _lm + '=1');
+        L.push('while ' + _lb + '<8 do');
+    } else {
+        L.push('local ' + _lb + '=0');
+        L.push('repeat');
+    }
+
+    L.push('if ' + _lp + '>#' + a_d + ' then break end');
+
+    if (lzssVariant === 1) {
+        L.push('if ' + a_ba + '(' + _lf + ',' + _lm + ')~=0 then');
+    } else if (rng() > 0.5) {
+        L.push('if ' + a_ba + '(' + _lf + ',' + a_bl + '(1,' + _lb + '))~=0 then');
+    } else {
+        L.push('if ' + a_br + '(' + _lf + ',' + _lb + ')%2==1 then');
+    }
+
+    if (useCounter) {
+        L.push(_lc + '=' + _lc + '+1');
+        L.push(a_o + '[' + _lc + ']=' + a_d + '[' + _lp + ']');
+    } else {
+        L.push(a_o + '[#' + a_o + '+1]=' + a_d + '[' + _lp + ']');
+    }
+    L.push(_lp + '=' + _lp + '+1');
+    L.push('else');
+
+    if (encVariant2 === 0) {
+        L.push('local ' + _lv + '=' + a_d + '[' + _lp + ']*256+' + a_d + '[' + _lp + '+1]');
+    } else if (encVariant2 === 1) {
+        L.push('local ' + _lv + '=' + a_bo + '(' + a_bl + '(' + a_d + '[' + _lp + '],8),' + a_d + '[' + _lp + '+1])');
+    } else {
+        L.push('local ' + _lv + '=' + a_bl + '(' + a_d + '[' + _lp + '],8)+' + a_d + '[' + _lp + '+1]');
+    }
+    L.push(_lp + '=' + _lp + '+2');
+    L.push('local ' + _loff + '=' + a_br + '(' + _lv + ',4)+1');
+    L.push('local ' + _lln + '=' + a_ba + '(' + _lv + ',0xF)+3');
+
+    if (useCounter) {
+        var _lbase = n(2);
+        L.push('local ' + _lbase + '=' + _lc);
+        L.push('for ' + _lj + '=1,' + _lln + ' do ' + _lc + '=' + _lc + '+1;' + a_o + '[' + _lc + ']=' + a_o + '[' + _lbase + '-' + _loff + '+' + _lj + '] end');
+    } else {
+        L.push('local ' + _lsz + '=#' + a_o);
+        L.push('for ' + _lj + '=1,' + _lln + ' do ' + a_o + '[#' + a_o + '+1]=' + a_o + '[' + _lsz + '-' + _loff + '+' + _lj + '] end');
+    }
+
+    L.push('end');
+
+    if (lzssVariant === 0) {
+        L.push('end end');
+    } else if (lzssVariant === 1) {
+        L.push(_lm + '=' + _lm + '*2');
+        L.push(_lb + '=' + _lb + '+1');
+        L.push('end end');
+    } else {
+        L.push(_lb + '=' + _lb + '+1');
+        L.push('until ' + _lb + '>=8');
+        L.push('end');
+    }
+
+    var fakeCheck3 = Math.floor(rng() * 0x7FFFFFFF);
+    L.push('if #'+a_o+'~='+srcBytes.length+' then local '+fk5+'={} for _i=1,#'+a_o+' do '+fk5+'[_i]='+a_sc+'('+a_ba+'('+a_bx+'('+a_o+'[_i],_i),0x7F)+1) end '+a_ls+'('+a_tc+'('+fk5+'))() return end');
+
+    var ahOk = n(3);
+    var ahDet = n(3);
+    L.push('local ' + ahDet + '=0');
+    L.push('do local ' + ahOk + '=pcall(function() if ' + tsVar + '(' + a_ls + ')~=' + sigVar + ' then ' + ahDet + '=' + ahDet + '+1 end end) end');
+    var testVal = Math.floor(rng() * 900) + 100;
+    var testCodeEnc = [];
+    for (var i = 0; i < ('return ' + testVal).length; i++) {
+        testCodeEnc.push(('return ' + testVal).charCodeAt(i));
+    }
+    L.push('do local ' + ahOk + '=pcall(function() local _f=' + a_ls + '(' + a_sc + '(' + testCodeEnc.join(',') + '));if not _f or _f()~=' + testVal + ' then ' + ahDet + '=' + ahDet + '+1 end end) end');
+    L.push('if ' + ahDet + '>1 then return end');
+
+    L.push('local ' + a_t + '={}');
+    L.push('for _i=1,#' + a_o + ' do ' + a_t + '[_i]=' + a_sc + '(' + a_o + '[_i]) end');
+    L.push(a_ls + '(' + a_tc + '(' + a_t + '))()');
+
+    return L.join(' ');
+}
+
+function processObfuscation() {
+    var src = document.getElementById("txtOriginal").value;
+    if (!src.trim()) {
+        alert("Vui lòng nhập code gốc trước!");
+        return;
+    }
+
+    var mode = currentMode;
+    var seed = Date.now() ^ (Math.random() * 0xFFFFFFFF);
+    seedRandom(seed);
+    _nameCounter = 0;
+
+    var xorKey = Math.floor(Math.random() * 150) + 50;
+    var v2Math = generateMathOps(xorKey, 30);
+
+    var antiTamper = generateAntiTamper();
+    var antiDebug = generateAntiDebug();
+
+    var payload = src;
+    var vmLayer = '';
+
+    if (mode === 'low') {
+        vmLayer = generateSimpleVM(payload, xorKey);
+        payload = antiTamper + '\n' + vmLayer + '\n' + payload;
+        payload = applyStringEncoding(payload, xorKey, 'low');
+        payload = applyControlFlow(payload, 'low');
+    } else if (mode === 'medium') {
+        vmLayer = buildCustomCipher(payload);
+        payload = antiTamper + '\n' + vmLayer;
+        payload = applyStringEncoding(payload, xorKey, 'medium');
+        payload = applyControlFlow(payload, 'medium');
+        for (var i = 0; i < 5; i++) {
+            payload += '\nlocal ' + randomName(5) + '={"' + randomName(20) + '"}';
+        }
+    } else {
+        var inner = buildCustomCipher(payload);
+        var outer = buildNestedVM(inner);
+        vmLayer = buildStubVM(outer);
+        payload = antiTamper + '\n' + vmLayer;
+        payload = applyStringEncoding(payload, xorKey, 'strong');
+        payload = applyControlFlow(payload, 'strong');
+        for (var i = 0; i < 15; i++) {
+            payload += '\nlocal ' + randomName(5) + '={"' + randomName(40) + '",' + Math.floor(rng()*999) + '}';
+        }
+        payload += '\n' + antiDebug;
+    }
+
+    var v1Str = encodeToSpecialFormat(payload, xorKey);
+
+    var innerLogic = 'local _v1,_v2=... local _chars="iho#/!%$@&*()_+-=[]{}|;:<>?,.\\" local _lut={} for _i=1,#_chars do _lut[string.sub(_chars,_i,_i)]=_i-1 end local function _dec(i) local b="" for _j=1,#i,2 do local c1=_lut[string.sub(i,_j,_j)] local c2=_lut[string.sub(i,_j+1,_j+1)] local bval=bit32.bor(bit32.lshift(c1,4),c2) b=b..string.char(bit32.bxor(bval,_v2)) end return b end local _main=loadstring(_dec(_v1)) if _main then task.spawn(_main) end';
+
+    var v3Plain = antiDebug + innerLogic;
+    var v3Str = encodeToSpecialFormat(v3Plain, xorKey);
+    var v4Str = encodeToSpecialFormat(innerLogic, xorKey);
+
+    var out = "--[ This File Protected By MagicObfuscator V1.0.4 ]\n";
+    out += 'local v1 = "' + v1Str + '"; local v2 = ' + v2Math + '; local v3 = "' + v3Str + '"; local v4 = "' + v4Str + '"; ';
+    out += 'local _b3=""; for _j=1,#v3,2 do local _c1=string.find("iho#/!%$@&*()_+-=[]{}|;:<>?,.\\",string.sub(v3,_j,_j))-1; local _c2=string.find("iho#/!%$@&*()_+-=[]{}|;:<>?,.\\",string.sub(v3,_j+1,_j+1))-1; _b3=_b3..string.char(bit32.bxor(bit32.bor(bit32.lshift(_c1,4),_c2),v2)) end; ';
+    out += 'loadstring(_b3)(v1,v2)';
+
+    document.getElementById("txtObfuscated").value = out;
+}
+
+function downloadFile() {
+    var code = document.getElementById("txtObfuscated").value;
+    if (!code.trim()) {
+        alert("Hãy ấn nút Obfuscate trước khi tải!");
+        return;
+    }
+    var blob = new Blob([code], { type: "text/plain;charset=utf-8" });
+    var link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "Obfuscated.lua.txt";
+    link.click();
+}
+</script>
+</body>
+</html>
