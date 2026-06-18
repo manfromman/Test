@@ -3,210 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MagicObfuscator V2 — Lua/Luau VM</title>
+    <title>MagicObfuscator V2</title>
     <style>
         :root {
-            --bg: #0a0512;
-            --panel: #130c1f;
-            --accent: #7b2cbf;
-            --accent2: #9d4edd;
-            --text: #e0aaff;
-            --muted: #7d7495;
-            --border: #2a1040;
+            --bg-color: #0d0614;
+            --panel-color: #160d22;
+            --accent-color: #7b2cbf;
+            --accent-hover: #9d4edd;
+            --text-color: #e0aaff;
+            --border-color: #3c165a;
         }
-        * { box-sizing: border-box; }
         body {
-            margin: 0; padding: 0;
-            background: var(--bg);
-            color: var(--text);
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex; flex-direction: column; align-items: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             min-height: 100vh;
         }
-        header { margin: 25px 0 8px; text-align: center; }
-        header h1 {
-            color: var(--accent2); margin: 0; font-size: 2.2rem;
-            text-shadow: 0 0 18px rgba(123,44,191,0.6);
+        header {
+            margin: 30px 0 10px 0;
+            text-align: center;
         }
-        header p { color: var(--muted); font-size: 0.9rem; margin: 6px 0 0; }
+        header h1 {
+            color: var(--accent-hover);
+            margin: 0;
+            font-size: 2.5rem;
+            text-shadow: 0 0 15px var(--accent-color);
+        }
+        header p {
+            color: #7d7495;
+            font-size: 0.95rem;
+        }
         .modebar {
-            display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; justify-content: center;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
         .modebar label {
-            background: var(--panel); border: 1px solid var(--border);
-            padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;
-            transition: .2s; user-select: none;
+            background: var(--panel-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: .2s;
+            user-select: none;
         }
         .modebar input { display: none; }
         .modebar input:checked + label {
-            background: var(--accent); border-color: var(--accent2); color: #fff;
+            background: var(--accent-color);
+            border-color: var(--accent-hover);
+            color: #fff;
             box-shadow: 0 0 10px rgba(157,78,221,0.35);
         }
         .container {
-            width: 92%; max-width: 1200px;
-            display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
-            margin-bottom: 18px;
+            width: 90%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 20px;
         }
-        @media (max-width: 860px) { .container { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) {
+            .container { grid-template-columns: 1fr; }
+        }
         .panel {
-            background: var(--panel); border: 1px solid var(--border);
-            border-radius: 12px; padding: 18px; display: flex; flex-direction: column;
-            box-shadow: 0 8px 28px rgba(0,0,0,0.55);
+            background-color: var(--panel-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
         }
-        .panel label { font-weight: 700; margin-bottom: 10px; color: var(--accent2); font-size: 1.05rem; }
+        .panel label {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--accent-hover);
+            font-size: 1.1rem;
+        }
         textarea {
-            width: 100%; height: 360px; background: #06030a;
-            border: 1px solid var(--border); border-radius: 6px;
-            color: #fff; padding: 12px; font-family: 'Courier New', Courier, monospace;
-            font-size: 0.85rem; resize: none; outline: none;
+            width: 100%;
+            height: 400px;
+            background-color: #08030d;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: #fff;
+            padding: 12px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            resize: none;
+            box-sizing: border-box;
+            outline: none;
         }
-        textarea:focus { border-color: var(--accent2); box-shadow: 0 0 10px rgba(157,78,221,0.25); }
-        .btn-group { display: flex; gap: 14px; justify-content: center; margin: 8px 0 28px; flex-wrap: wrap; }
+        textarea:focus {
+            border-color: var(--accent-hover);
+            box-shadow: 0 0 8px rgba(157, 78, 221, 0.3);
+        }
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 10px;
+            margin-bottom: 30px;
+        }
         button {
-            background: var(--accent); color: #fff; border: none;
-            padding: 13px 26px; font-size: 0.95rem; font-weight: 700;
-            border-radius: 8px; cursor: pointer; transition: all .25s ease;
-            box-shadow: 0 4px 14px rgba(123,44,191,0.35);
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(123, 44, 191, 0.3);
         }
-        button:hover { background: var(--accent2); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(157,78,221,0.5); }
-        #btnDownload { background: #2a1040; border: 1px solid var(--border); }
-        #btnDownload:hover { background: #3d1860; }
-        .hint { color: var(--muted); font-size: 0.78rem; text-align: center; max-width: 800px; margin: 0 auto 20px; line-height: 1.5; }
+        button:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(157, 78, 221, 0.5);
+        }
+        #btnDownload {
+            background-color: #3c165a;
+            border: 1px solid var(--border-color);
+        }
+        #btnDownload:hover {
+            background-color: #5a2086;
+        }
     </style>
 </head>
 <body>
 
-<<header>
-    <h1>MagicObfuscator V2</h1>
-    <p>VM-based Lua/Luau Obfuscator — return({...}):Init(ENV) style</p>
-</header>
+    <header>
+        <h1>MagicObfuscator V2 Lua/Luau</h1>
+        <p>Web MagicObfuscator helps protect your Lua/Luau code</p>
+    </header>
 
-<div class="modebar">
-    <input type="radio" name="mode" id="m0" value="vm" checked>
-    <label for="m0">VM Only</label>
-    <input type="radio" name="mode" id="m1" value="vmenc">
-    <label for="m1">VM + EncryptString</label>
-    <input type="radio" name="mode" id="m2" value="vmanti">
-    <label for="m2">VM + AntiTamper</label>
-    <input type="radio" name="mode" id="m3" value="all">
-    <label for="m3">All Features</label>
-</div>
-
-<div class="container">
-    <div class="panel">
-        <label for="txtOriginal">Source Code (Lua / Luau)</label>
-        <textarea id="txtOriginal" placeholder="Paste your code here..."></textarea>
+    <div class="modebar">
+        <input type="radio" name="mode" id="m0" value="vm" checked>
+        <label for="m0">VM Only</label>
+        <input type="radio" name="mode" id="m1" value="vmenc">
+        <label for="m1">VM + EncryptString</label>
+        <input type="radio" name="mode" id="m2" value="vmanti">
+        <label for="m2">VM + AntiTamper</label>
+        <input type="radio" name="mode" id="m3" value="all">
+        <label for="m3">All Features</label>
     </div>
-    <div class="panel">
-        <label for="txtObfuscated">Obfuscated Output</label>
-        <textarea id="txtObfuscated" readonly placeholder="Output will appear here..."></textarea>
+
+    <div class="container">
+        <div class="panel">
+            <label for="txtOriginal">Mã Nguồn (Source Code)</label>
+            <textarea id="txtOriginal" placeholder="Paste Code Here..."></textarea>
+        </div>
+        <div class="panel">
+            <label for="txtObfuscated">Output</label>
+            <textarea id="txtObfuscated" readonly placeholder=""></textarea>
+        </div>
     </div>
-</div>
 
-<div class="btn-group">
-    <button id="btnObfuscate" onclick="processObfuscation()">Obfuscate</button>
-    <button id="btnDownload" onclick="downloadFile()">Download .lua</button>
-</div>
-
-<div class="hint">
-    • <b>VM Only</b>: Pure stack-based VM executor giống file obfuscated.lua gốc (return table + Init).<<br>
-    • <b>VM + EncryptString</b>: Thêm Base91 + XOR rolling hash + LZ77-like decompress giống file (1).<<br>
-    • <b>VM + AntiTamper</b>: Thêm debug.getinfo / getfenv check + _G proxy trap giống file (2).<<br>
-    • <b>All</b>: Tổng hợp cả 3 lớp bảo vệ.
-</div>
+    <div class="btn-group">
+        <button id="btnObfuscate" onclick="processObfuscation()">Obfuscate</button>
+        <button id="btnDownload" onclick="downloadFile()">Download</button>
+    </div>
 
 <script>
-/* ==================== UTILITIES ==================== */
+/* ===================== UTILITIES ===================== */
 function randName(len){
     const c='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-    let s=''; for(let i=0;i<<len;i++) s+=c[Math.floor(Math.random()*c.length)];
+    let s='';
+    for(let i=0;i<<len;i++) s+=c[Math.floor(Math.random()*c.length)];
     return s;
 }
 function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
-function randMagic(){ return randInt(10000,99999); }
 
-/* ---------- Base91 (file 1 style) ---------- */
-const B91_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~\"";
-const B91_DECODE = {};
-for(let i=0;i<B91_ALPHABET.length;i++) B91_DECODE[B91_ALPHABET.charCodeAt(i)] = i;
-
-function base91Encode(data){
-    let b=0,n=0,v=-1, out='';
-    for(let i=0;i<<data.length;i++){
-        let c = B91_DECODE[data.charCodeAt(i)];
-        if(c===undefined) continue;
-        if(v<<0) v=c;
-        else { v+=c*91; b|=(v<<n); n+=(v&8191)>88?13:14; v=-1; while(n>7){ out+=String.fromCharCode(b&255); b>>=8; n-=8; } }
-    }
-    if(v>=0){ out+=String.fromCharCode((b|(v<<n))&255); }
-    return out;
-}
-function base91Decode(str){
-    let v=-1,b=0,n=0, out='';
-    for(let i=0;i<<str.length;i++){
-        let p = B91_ALPHABET.indexOf(str[i]);
-        if(p<<0) continue;
-        if(v<<0) v=p;
-        else { v+=p*91; b|=v<<n; n+=(v&8191)>88?13:14; v=-1; while(n>7){ out+=String.fromCharCode(b&255); b>>=8; n-=8; } }
-    }
-    if(v>=0) out+=String.fromCharCode((b|(v<<n))&255);
-    return out;
-}
-
-/* ---------- LZ77-like short compress (file 1 style) ---------- */
-function lzCompress(s){
-    if(!s) return '';
-    let out=[], i=0;
-    while(i<s.length){
-        let bestLen=0, bestOff=0;
-        for(let d=1;d<=255 && i-d>=0;d++){
-            let len=0;
-            while(len<<255 && i+len<s.length && s[i+len]===s[i-d+len]) len++;
-            if(len>bestLen){ bestLen=len; bestOff=d; }
-        }
-        if(bestLen>=4){
-            out.push(128+(bestLen-3)); out.push(bestOff);
-            i+=bestLen;
-        } else {
-            let lit=Math.min(127, s.length-i);
-            out.push(lit);
-            for(let k=0;k<<lit;k++) out.push(s.charCodeAt(i+k));
-            i+=lit;
-        }
-    }
-    return String.fromCharCode(...out);
-}
-function lzDecompress(s){
-    let out=[], i=0;
-    while(i<s.length){
-        let b=s.charCodeAt(i++);
-        if(b<=127){
-            for(let k=0;k<b && i<s.length;k++) out.push(s.charCodeAt(i++));
-        } else {
-            let len=(b-128)+3, off=s.charCodeAt(i++);
-            if(off===undefined) break;
-            let start=out.length-off;
-            for(let k=0;k<<len;k++) out.push(out[start+k]);
-        }
-    }
-    return String.fromCharCode(...out);
-}
-
-/* ---------- XOR + Hash (file 0/1 style) ---------- */
-function xorEncrypt(str, key){
-    let out='';
-    for(let i=0;i<<str.length;i++) out+=String.fromCharCode(str.charCodeAt(i)^((key+i*131+173)&255));
-    return out;
-}
-function xorDecrypt(str, key){ return xorEncrypt(str,key); }
-
-function rollingHash(s){
-    let h=173;
-    for(let i=0;i<s.length;i++) h=(((h*131)+s.charCodeAt(i)+i)&65535);
-    return h;
-}
-
-/* ---------- Custom byte-to-4char (file HTML v1 style) ---------- */
 function byteToCustom(b){
     let l1=Math.floor(b/26), l2=b%26, l3=(l1+l2)%26, l4=(l1*l2)%26;
     return String.fromCharCode(97+l1,97+l2,97+l3,97+l4);
@@ -214,23 +190,12 @@ function byteToCustom(b){
 function encodeCustom(str){
     return Array.from(str).map(c=>byteToCustom(c.charCodeAt(0))).join('/');
 }
-function decodeCustom(str, key){
-    let out='';
-    for(let w of str.split('/')){
-        if(w.length<<2) continue;
-        let b=(w.charCodeAt(0)-97)*26+(w.charCodeAt(1)-97);
-        out+=String.fromCharCode(b^key);
-    }
-    return out;
-}
-
-/* ---------- Math obfuscation ---------- */
 function genMathExpr(target, steps){
     let cur=randInt(10000,50000), expr=''+cur;
     for(let i=0;i<<steps-5;i++){
         let op=Math.random()>0.5?'+':'-';
         let v=randInt(1000,9999);
-        expr+=op==='+'?(cur+=v,' + '+v):(cur-=v,' - '+v);
+        if(op==='+'){ cur+=v; expr+=' + '+v; } else { cur-=v; expr+=' - '+v; }
     }
     expr += ' + bit32.bxor(105,105) - bit32.band(255,0)';
     let diff=target-cur;
@@ -238,186 +203,7 @@ function genMathExpr(target, steps){
     return '('+expr+')';
 }
 
-/* ==================== GENERATORS PER MODE ==================== */
-
-function generateVMCore(){
-    // Tạo các hàm VM giả lập giống file obfuscated.lua gốc
-    const n=['aUYk','K','Tf','eSC','LL','Td','f','kD','EKxH','Wzk','zMLTW','j','O','tMf','M','PW','mEF','uH','ESPgy','Wh','ruaW','hrXm','CZF','vgB','wtn','lgy','Q','ZML','BwBjB','LNi','GCb','JTUJK','JFpZc','BGotK','JH','V','mVT','PpGU','ILZS','G','m','q','OWq','Hknr','AtD','yCA','OJuQ','gSrAZ','ml','MdajZ','pKm','cKI','UD','el','fsHh','rSXl','YWBE','kXRxN','TFe','Lv','eSC','X','Wzk','CZF','Hknr','Td','kD','LNi','UIdcH','yCA','OJuQ'];
-    const sh=n.map(()=>randName(randInt(3,6)));
-    const map={}; n.forEach((k,i)=>map[k]=sh[i]);
-
-    // Magic numbers giống file gốc
-    const m373=randMagic(), m18621=randMagic(), m4999=randMagic(), m2459=randMagic();
-    const m14131=randMagic(), m15154=randMagic(), m6166=randMagic(), m8859=randMagic();
-    const m191=randMagic(), m19606=randMagic(), m3098=randMagic(), m24342=randMagic();
-    const m7190=randMagic(), m13761=randMagic(), m23620=randMagic(), m8449=randMagic();
-    const m16937=randMagic(), m9262=randMagic(), m28752=randMagic(), m18247=randMagic();
-    const m22068=randMagic(), m6857=randMagic(), m1619=randMagic(), m7350=randMagic();
-    const m32491=randMagic(), m23189=randMagic(), m28855=randMagic(), m14251=randMagic();
-    const m8240=randMagic(), m29980=randMagic(), m4098=randMagic(), m25256=randMagic();
-    const m11270=randMagic(), m12906=randMagic(), m4722=randMagic(), m25482=randMagic();
-    const m24964=randMagic(), m2407=randMagic(), m16259=randMagic(), m7189=randMagic();
-    const m2816=randMagic(), m10293=randMagic(), m18668=randMagic(), m20795=randMagic();
-    const m4879=randMagic(), m3644=randMagic(), m19609=randMagic(), m22193=randMagic();
-    const m12135=randMagic(), m26224=randMagic(), m19848=randMagic(), m11137=randMagic();
-    const m31624=randMagic(), m21904=randMagic(), m28987=randMagic(), m14656=randMagic();
-    const m17955=randMagic(), m15504=randMagic(), m2449=randMagic(), m8099=randMagic();
-    const m27434=randMagic(), m4985=randMagic(), m6376=randMagic(), m18896=randMagic();
-    const m11272=randMagic(), m32006=randMagic(), m12886=randMagic(), m7553=randMagic();
-    const m6947=randMagic(), m1531=randMagic(), m14483=randMagic(), m23974=randMagic();
-    const m18155=randMagic(), m31262=randMagic(), m9577=randMagic(), m9578=randMagic();
-
-    // Build table body
-    let body='';
-
-    // VM Executor core (K / ayUH / SU)
-    body+=`[${map.K}]=function(l,e,c){local b,d,s,C,t=l["${randName(4)}"]["xpcall"]or xpcall,l["${randName(3)}"],l["${randName(4)}"]["error"]or error,l["${map.EKxH}"],(l["${randName(4)}"]["table"]and l["${randName(4)}"]["table"]["unpack"])or l["${randName(4)}"]["unpack"];if not t then t=function(l,n,e)n=n or 1;e=e or#l;if n>e then return end;return l[n],t(l,n+1,e)end end;local r=l["${randName(3)}"];local a=#r+1;r[a]=e;local function f(n)if type(n)~="table"then return end;n[${m373}]=nil;n[${m24342}]=nil;n[${m3098}]=nil;n[${m18621}]=nil;n[${m4999}]=nil;n[${m2459}]=nil;n[${m14131}]=nil;n[${m15154}]=nil;n[${m6166}]=nil;n[${m8859}]=nil;n[${m191}]=nil;n[${m19606}]=nil;n[${m7190}]=nil;n[${m13761}]=nil;n[${m23620}]=nil end;local function u(n)local e,l=n[${m4999}],n[${m2459}];if e==nil or l==nil then e=${m4999};l=${m2459};n[${m4999}]=e;n[${m2459}]=l;n[${m18621}]=(n[${m18621}]or 1)+(e-l)-1 end;return e-l end;local x=u(e);local function B(...)return{n=select("#",...),...}end;local function h()while true do local n=e[${m18621}];local i=n-x;local o=c[i];if not o then return end;e[${m18621}]=n+1;local n=o[6];if not n then local e=(((i+15351)*1401)+19605)%131071;local l,e=(((i+3682)*535)+4790)%65535,d["bxor"](o[4]or 0,19605)-e;local e=e-l;local e=(((d["bxor"](e,29471)*475)+42045)%131071);n=C[e];if n then o[6]=n end end;if not n then return end;n(l,e,o);local n=e[${m13761}];if n then local o=e;e[${m13761}]=nil;local l=l["${randName(3)}"]and l["${randName(3)}"][n[1]];if l then e,c=l(n[2]or{},n["n"]or 0);x=u(e);r[a]=e;f(o)end else local n=e[${m7190}];if n then e[${m7190}]=nil;return t(n,1,n["n"]or 0)end end end end;local l,n=b(function()return B(h())end,function(n)return n end);f(e);r[a]=nil;if not l then if n=="stack overflow"then n="vm:1: stack overflow"end;s(n,0)end;return t(n,1,n["n"]or 0)end,`;
-
-    // Init / OJuQ / FqSL / aeqZL
-    body+=`[${map.OJuQ}]=function(n,l,e)local o=type(l);if o=="table"and e==nil then e=l;l=n["${randName(3)}"];n["${randName(3)}"]=nil;o=type(l)end;if o=="function"then local t=l;l=t(n,e);o=type(l)end;if(o~="string"and o~="table")or l==""then return end;local c=bit32;e=e or(_ENV or(getfenv and getfenv())or _G);local t=e["setmetatable"]or setmetatable;n["${randName(3)}"]=nil;n["${randName(4)}"]=e;n["${randName(4)}"]={};n["${randName(3)}"]={};n["${randName(4)}"]={};n["${randName(3)}"]={};n["${randName(3)}"]=t and t({},{["__mode"]="k"})or{};n["${randName(3)}"]={};n["${randName(2)}"]={};local o,r=n["${randName(4)}"],true;if r then o["_G"]=o;o["limitedstack"]=true;if t then t(o,{["__index"]=e,["__metatable"]={}})end end;local t,a=e["getfenv"]or getfenv,e["setfenv"]or setfenv;local function i(e)if type(e)~="number"then error("bad argument #1 to 'getfenv' (number expected)",3)end;local n=n["${randName(3)}"];local n=n[#n-e+1];if not n then error("invalid stack level",3)end;return n end;local function d(e)local e=n["${randName(3)}"]and n["${randName(3)}"][e];if e then return e(n["${randName(2)}"])end;return nil end;if r then o["getfenv"]=function(e)if e==nil then e=1 end;local l=type(e);if l=="number"then if e==0 then return n["${randName(4)}"]end;return i(e)[${m6166}]elseif l=="function"then local n=d(e);if n~=nil then return n end;if t then return t(e)end end;error("invalid argument to getfenv",2)end;o["setfenv"]=function(l,e)e=e or n["${randName(4)}"];local t=type(l);if t=="number"then if l==0 then n["${randName(4)}"]=e;return nil end;local l=i(l);l[${m6166}]=e;local l=l[${m23620}];local o=l and n["${randName(3)}"]and n["${randName(3)}"][l];if o then o(n["${randName(2)}"],e)end;return l elseif t=="function"then local o=n["${randName(3)}"]and n["${randName(3)}"][l];if o then o(n["${randName(2)}"],e);return l end end;error("cannot change environment",2)end end;local t=e["loadstring"]or e["load"];if r and t then o["loadstring"]=function(l,e)local e,l=t(l,e);if type(e)=="function"and a then a(e,n["${randName(4)}"])end;return e,l end;o["load"]=o["loadstring"]end;local t,r,o="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_\\`{|}~\\"",e["string"]["byte"],{};for e=1,#t do o[r(t,e)]=e-1 end;n["${randName(4)}"]=o;local o=c or e["bit32"]or(function()local function t(n,e)local o,l=0,1;for t=1,32 do if n%2==1 and e%2==1 then o=o+l end;n,e,l=(n-n%2)/2,(e-e%2)/2,l*2 end;return o end;local function a(n,e)local l,o=0,1;for t=1,32 do if n%2==1 or e%2==1 then l=l+o end;n,e,l=(n-n%2)/2,(e-e%2)/2,o*2 end;return o end;local function r(n,e)local l,o=0,1;for t=1,32 do if n%2~=e%2 then l=l+o end;n,e,o=(n-n%2)/2,(e-e%2)/2,o*2 end;return l end;local function o(e,n)if n>=32 then return 0 end;return(e%4294967296)*(2^n)%4294967296 end;local function l(l,e)if e>=32 then return 0 end;return n["${randName(4)}"]["math"]["floor"]((l%4294967296)/(2^e))end;local function n(n)return 4294967295-n%4294967296 end;return{bxor=r,band=t,bor=a,bnot=n,lshift=o,rshift=l}end)();n["${randName(3)}"]=o;n["${map.EKxH}"]=n["${map.EKxH}"]or(n["${map.Tf}"])(n);n["${map.Tf}"]=nil;n["${randName(4)}"]=l;local r=(e["table"]and e["table"]["unpack"])or e["unpack"]or unpack;local function t(...)return{n=select("#",...),...}end;local o;if false then o=t((n["${map.pKm}"])(n,l,0))else o=t((n["${map.Lv}"])(n,l,e))end;local e=n["${randName(3)}"];if e then for n=1,#e do e[n]=nil end end;n["${randName(4)}"]=nil;n["${randName(4)}"]=nil;n["${randName(2)}"]=nil;n["${randName(2)}"]=nil;n["${randName(2)}"]=nil;n["${randName(2)}"]=nil;return r(o,1,o["n"]or 0)end,`;
-
-    // State prep (aUYk / bG / pvKB)
-    body+=`[${map.aUYk}]=function(n,o,l){local e=o and o[1];if not e then return end;n["${randName(3)}"]=o[2]or{};n["${map.EKxH}"]=n["${map.EKxH}"]or(n["${map.Tf}"])(n);e[${m23189}]=e[${m23189}]or{};local o=0;if o~=0 then(n["${randName(5)}"])(n,e[${m7350}],e[${m32491}],o)end;local c,o,i={},{},{};o["n"]=0;local a=0;if l then local r,e,d,c=l["n"]or#l,1,n["${map.MdajZ}"],e[${m1619}]or 0;for t=1,r do local l=l[t];i[(d)(n,t-1)]=l;if t>c then o[e]=l;e=e+1 end end;o["n"]=e-1;if r>0 then a=r-1 end end;local l={[${m373}]=i,[${m24342}]=c,[${m3098}]=e[${m32491}],[${m18621}]=(${m4999}-${m2459})+1,[${m4999}]=${m4999},[${m2459}]=${m2459},[${m14131}]=a,[${m15154}]=o,[${m6166}]=n["${randName(4)}"],[${m8859}]=e[${m23189}],[${m191}]=e,[${m19606}]={}};return(n["${map.K}"])(n,l,e[${m7350}])end,`;
-
-    // Instruction decoder (kD / xukJ / gkLy)
-    body+=`[${map.kD}]=function(n,l,a){local o=n["${randName(3)}"];local t,e=(n["${map.eSC}"])(n,l,1);local i=o["bxor"](t or 0,${randInt(1000,9999)});local r=i;if a then local n=(((a+${randInt(1000,9999)})*${randInt(100,999)}+${randInt(1000,9999)})%65535;r=r-n end;local t=i;if a then local n=(((a+${randInt(1000,9999)})*${randInt(100,999)}+${randInt(1000,9999)})%131071;t=o["bxor"](i+n,${randInt(1000,9999)})else t=o["bxor"](i+${randInt(1000,9999)},${randInt(1000,9999)})end;local t={[4]=t};if r==${randInt(10000,99999)} then local o;o,e=(n["${map.eSC}"])(n,l,e);local r={};for a=1,o or 0 do local o;o,e=(n["${map.eSC}"])(n,l,e);if o==nil then break end;local l=n["${randName(4)}"]["string"]["sub"](l,e,e+o-1);e=e+o;r[a]=(n["${map.kD}"])(n,l)end;t[9]=r;return t end;local d;local x;local u;local c;local r;r,e=(n["${map.eSC}"])(n,l,e);local f=${randInt(10000,99999)};if a then f=(((a+${randInt(1000,9999)})*${randInt(100,999)}+${randInt(1000,9999)})%65535 end;r=o["bxor"](r or f,f);if o["band"](r,1)~=0 then d,e=(n["${map.G}"])(n,l,e);d=(d or 4)-4 end;if o["band"](r,8)~=0 then c,e=(n["${map.LL}"])(n,l,e)end;if o["band"](r,4)~=0 then u,e=(n["${map.vg}"])(n,l,e)end;if o["band"](r,2)~=0 then x,e=(n["${map.vg}"])(n,l,e)end;local e={[${m16937}]=${m16937},[${m9262}]=0};local l={[${m16937}]=${m16937},[${m9262}]=0};t[5]=(d or 0)+2;t[8]={[1]=x or e,[3]=u or l,[2]=(i%23)};if false then t[1]=(n["${randName(4)}"])(n,c or"")elseif c and c~=""then t[1]=c end;return t end,`;
-
-    // String decoder (LL / eSJ / x)
-    body+=`[${map.LL}]=function(l,o,n){local e=l["${randName(4)}"];local t=e["string"]["sub"];local e;e,n=(l["${map.eSC}"])(l,o,n);if e==nil then return nil,n end;local l=t(o,n,n+e-1);return l or"",n+e end,`;
-
-    // Integer decoder (eSC / fLZv / oKTMy)
-    body+=`[${map.eSC}]=function(n,r,e){local n=n["${randName(4)}"];local e,t,n,o,l=0,n["string"]["byte"],e,1,0;while true do local t=t(r,n);if not t then return nil,n end;l=l+(t%128)*o;n=n+1;if t<<128 then break end;o=o*128;e=e+7;if e>56 then return nil,n end end;return l,n end,`;
-
-    // Value pair reader (vg / T / Irk)
-    body+=`[${map.vg}]=function(e,t,n){local r=e["${randName(3)}"];local l;local o;l,n=(e["${map.eSC}"])(e,t,n);o,n=(e["${map.G}"])(e,t,n);if l==nil then l=r["bxor"](${randInt(1000,9999)},7)end;return{[${m16937}]=r["bxor"](l,7),[${m9262}]=(o or 5)-5},n end,`;
-
-    // Number decoder (G / fYkww / eQMOt)
-    body+=`[${map.G}]=function(l,o,n){local e;e,n=(l["${map.eSC}"])(l,o,n);if e==nil then return 0,n end;if e%2==0 then return e/2,n end;return-((e+1)/2),n end,`;
-
-    // Hash/Encrypt (Td / GOw / i)
-    body+=`[${map.Td}]=function(t,i,l){local n=t["${randName(4)}"];local c,f,o,d=n["math"]["floor"],n["table"]["concat"],n["string"]["byte"],n["string"]["char"];local function a(e,n)local o,l=0,1;while e>0 or n>0 do local r,t=n%2,e%2;if t~=r then o=o+l end;e=(e-r)/2;n=(n-t)/2;l=l*2 end;return o end;local x=(t["${randName(3)}"]and t["${randName(3)}"]["bxor"])or a;local function t(l){local n=173;for e=1,#l do n=(n*131+o(l,e)+e)%65536 end;return n end;local e,r=#i,#l;if r==0 then return""end;local t,a,n=r*13%256,{},t(l);for e=1,e do local r=((e-1)%r)+1;local r=o(l,r);local o,l=(n+c(n/256)+r+t)%256,o(i,e);a[e]=d(x(l,o));t=l;n=(n+r*17+e*11+t*7)%65536 end;return f(a)end,`;
-
-    // String decrypt (f / XPB / f)
-    body+=`[${map.f}]=function(n,e,t){if e==nil or e==""then return{}end;local l=n["${randName(4)}"];local a,o,r,c,i,e,d=n["${randName(3)}"],1,(n["${map.Td}"])(n,e,t),#t,{},1,l["string"]["byte"];while o<=#r do local l;l,o=(n["${map.eSC}"])(n,r,o);if l==nil then break end;local n=d(t,((e-1)%c)+1);local n=a["bxor"]((e*${randInt(100,999)})+${randInt(10000,99999)},n);i[e]=a["bxor"](l,n);e=e+1 end;return i end,`;
-
-    // Payload decrypt (BwBjB / lOaNx / ZDT / wib)
-    body+=`[${map.BwBjB}]=function(e,n){if n==nil or n==""then return n or""end;local l=e["${randName(4)}"];local o,t="${randName(15)}",l["string"]["sub"];local l=#o;if#n<=l or t(n,1,l)~=o then return n end;local t,o=(e["${map.LL}"])(e,n,l+1);local l;l,o=(e["${map.eSC}"])(e,n,o);if not t or l==nil or o~=(#n+1)then return n end;return(e["${map.LNi}"])(e,t,l)end,`;
-
-    // LZ77 decompress (LNi / jWS / wWN)
-    body+=`[${map.LNi}]=function(a,l,o){if l==nil or l==""then return l or""end;local n=a["${randName(4)}"];local c,i,d=n["string"]["char"],n["table"]["concat"],n["string"]["byte"];local n,e,r=1,0,{};while n<=#l do local t=d(l,n);if not t then break end;n=n+1;if t<<128 then local o=t+1;if n+o-1>#l then return nil end;for o=0,o-1 do e=e+1;r[e]=c(d(l,n+o))end;n=n+o else local t=(t-128)+3;local o;o,n=(a["${map.eSC}"])(a,l,n);if o==nil then return nil end;local n=o+1;if n<=0 or n>e then return nil end;local n=e-n+1;for l=1,t do local l=r[n];if l==nil then return nil end;e=e+1;r[e]=l;n=n+1 end end;if o and o~=0 and e>o then return nil end end;if o and o~=0 and e~=o then return nil end;return c(r)end,`;
-
-    // Table builder (JFpZc / o / NmQ)
-    body+=`[${map.JFpZc}]=function(e,l){local c,f,i,n={},#l,1,1;while n<=f do local x=n;local d;local t;local r;local a;local o;c[i]=n;d,n=(e["${map.eSC}"])(e,l,n);t,n=(e["${map.eSC}"])(e,l,n);r,n=(e["${map.eSC}"])(e,l,n);a,n=(e["${map.eSC}"])(e,l,n);o,n=(e["${map.eSC}"])(e,l,n);if d==nil or t==nil or r==nil or a==nil or o==nil then break end;if t<<0 or r<<0 or a<<0 or o<<0 then break end;local e=n+t+r+a+o;if e<=x then break end;if e>f+1 then break end;n=e;i=i+1 end;return c end,`;
-
-    // Upvalue / closure helpers
-    body+=`[${map.JTUJK}]=function(n,l,o,e){local n={n=e or 0};for e=1,e or 0 do n[e]=o[e]end;l[${m7190}]=n end,`;
-    body+=`[${map.BGotK}]=function(o,n,l,e){n[${m373}][l]=e;local n=n[${m19606}];local n=n and n[l];if n then n[1]=e end end,`;
-    body+=`[${map.JH}]=function(e,r,n){local o,t=n[${m16937}]or ${m16937},n[${m9262}]or 0;if o==${m16937} then local l=n[${m8449}];if l~=nil then if l==e["${randName(2)}"]then return nil end;return l end;local l=r[${m3098}][t];if l==e["${randName(4)}"]then n[${m8449}]=e["${randName(4)}"];return nil end;n[${m8449}]=l==nil and e["${randName(4)}"]or l;return l elseif o==${randInt(1000,9999)} then return r[${m373}][t]elseif o==${randInt(1000,9999)} then return t end;return nil end,`;
-    body+=`[${map.V}]=function(l,e,n){return e[${m373}][n]end,`;
-    body+=`[${map.mVT}]=function(e,n){local n=n[8];return(type(n)=="table"and n[1])or{}end,`;
-    body+=`[${map.PpGU}]=function(e,n){local n=n[8];return(type(n)=="table"and n[3])or{}end,`;
-    body+=`[${map.ILZS}]=function(e,n){return(n[5]or 2)-2 end,`;
-
-    // VM Opcode handlers (subset, giống file gốc)
-    body+=`[${map.Wzk}]=function(n,o,e){local a,d,i,u=(n["${randName(4)}"]["table"]and n["${randName(4)}"]["table"]["unpack"])or n["${randName(4)}"]["unpack"],n["${map.BGotK}"],n["${map.V}"],n["${map.K}"];if not a then a=function(l,n,e)n=n or 1;e=e or#l;if n>e then return end;return l[n],a(l,n+1,e)end end;local l,c,t,f=((e[5]or 2)-2),(((((e[8]or{})[3]or{})))[${m9262}]or 0),e[1],(((((e[8]or{})[1]or{})))[${m9262}]or 0);if type(t)~="number"then t=(n["${map.G}"])(n,t or"",1)or-1;e[1]=t end;local x,e,r=i(n,o,l),0,{};if(f>=0)then for t=1,f do e=e+1;r[e]=i(n,o,l+t)end else if t<<0 then t=0 end;for t=1,t do e=e+1;r[e]=i(n,o,l+t)end;local a=o[${m14131}]or(l+t);for l=l+t+1,a do e=e+1;r[e]=i(n,o,l)end end;local function i(...){local n=select("#",...);local e={n=n};for n=1,n do e[n]=select(n,...)end;return e}end;local f=n["${randName(3)}"]and n["${randName(3)}"][x];local t;if f then local l,e=f(r,e);t=i(u(n,l,e))else t=i(x(a(r,1,e)))end;if c<<0 then for e=1,t["n"]do d(n,o,l+e-1,t[e])end;o[${m14131}]=l+t["n"]-1 elseif c>0 then for e=1,c do d(n,o,l+e-1,t[e])end;o[${m14131}]=l+c-1 else o[${m14131}]=l-1 end end,`;
-
-    body+=`[${map.tMf}]=function(o,l,r,t){local e,n={},0;for t=r,t do n=n+1;e[n]=(o["${map.V}"])(o,l,t)end;e["n"]=n;l[${m7190}]=e end,`;
-    body+=`[${map.M}]=function(e,l,n){local o=e["${map.JH}"];local t=l[${m373}][((n[5]or 2)-2)];t[o(e,l,(((n[8]or{})[1]or{})))]=o(e,l,(((n[8]or{})[3]or{})))end,`;
-    body+=`[${map.PW}]=function(n,e,l){local o,t=n["${map.BGotK}"],n["${map.JH}"];local r,a=t(n,e,(((l[8]or{})[1]or{}))),e[${m6166}];local t=a[r];if t==n["${randName(3)}"]then o(n,e,((l[5]or 2)-2),nil)elseif t~=nil then o(n,e,((l[5]or 2)-2),t)elseif r=="limitedstack"then o(n,e,((l[5]or 2)-2),true)elseif a~=n["${randName(4)}"]then o(n,e,((l[5]or 2)-2),nil)else o(n,e,((l[5]or 2)-2),n["${randName(4)}"][r])end end,`;
-    body+=`[${map.mEF}]=function(t,a,r){local i,e=t["${map.BGotK}"],t["${map.JH}"];local n=r[1];if type(n)~="number"then local e=(t["${map.eSC}"])(t,n or"",1)or 0;n=t["${randName(3)}"]["bxor"](e,${randInt(10000,99999)});r[1]=n end;local o,l=e(t,a,(((r[8]or{})[1]or{}))),e(t,a,(((r[8]or{})[3]or{})));local e;if n==${randInt(10000,99999)} then e=o==l elseif n==${randInt(10000,99999)} then e=o~=l elseif n==${randInt(10000,99999)} then e=o>l elseif n==${randInt(10000,99999)} then e=o>=l elseif n==${randInt(10000,99999)} then e=o<<l elseif n==${randInt(10000,99999)} then e=o<=l elseif n==${randInt(10000,99999)} then e=o+l elseif n==${randInt(10000,99999)} then e=o-l elseif n==${randInt(10000,99999)} then e=o*l elseif n==${randInt(10000,99999)} then e=o/l elseif n==${randInt(10000,99999)} then e=o%l elseif n==${randInt(10000,99999)} then e=o^l elseif n==${randInt(10000,99999)} then e=o..l elseif n==${randInt(10000,99999)} then e=o and l elseif n==${randInt(10000,99999)} then e=o or l end;i(t,a,((r[5]or 2)-2),e)end,`;
-    body+=`[${map.Wh}]=function(n,l,o){local e=n["${map.BGotK}"];e(n,l,((o[5]or 2)-2),{})end,`;
-    body+=`[${map.CZF}]=function(n,e,o){local l=n["${map.BGotK}"];l(n,e,((o[5]or 2)-2),false)end,`;
-    body+=`[${map.O}]=function(l,n,e){if not n[${m373}][((e[5]or 2)-2)]then do local e=(((((e[8]or{})[1]or{})))[${m9262}]or 0);local l=(n[${m4999}]or ${m4999})-(n[${m2459}]or ${m2459});n[${m18621}]=l+e end end end,`;
-    body+=`[${map.uH}]=function(n,l,e){local o=n["${map.BGotK}"];o(n,l,((e[5]or 2)-2),(((((e[8]or{})[1]or{})))[${m9262}]or 0))end,`;
-    body+=`[${map.ESPgy}]=function(n,e,l){local r,t=n["${map.JH}"],n["${map.BGotK}"];local o=e[${m373}][((l[5]or 2)-2)];t(n,e,((l[5]or 2)-2)+1,o);local r=r(n,e,(((l[8]or{})[1]or{})));local a=o[r];if a==nil then t(n,e,((l[5]or 2)-2),function()error("attempt to call missing method '"..tostring(r).."' of "..type(o))end)else t(n,e,((l[5]or 2)-2),a)end end,`;
-    body+=`[${map.hrXm}]=function(l,o,e){local a=l["${map.V}"];local r,i,t,n=(((((e[8]or{})[1]or{})))[${m9262}]or 0),o[${m373}][((e[5]or 2)-2)],(((((e[8]or{})[3]or{})))[${m9262}]or 0),e[1];if type(n)~="number"then n=(l["${map.eSC}"])(l,n or"",1)or 0;e[1]=n end;if n~=0 then t=o[${m14131}]or(r-1)end;local n=0;for e=r,t do n=n+1;i[n]=a(l,o,e)end end,`;
-    body+=`[${map.j}]=function(n,o,l){local a,r=n["${map.V}"],n["${map.JTUJK}"];local e=l[1];if type(e)~="number"then e=(n["${map.eSC}"])(n,e or"",1)or 0;l[1]=e end;if e==0 then r(n,o,{},0);return end;local e,t=(((((l[8]or{})[1]or{})))[${m9262}]or 0),((l[5]or 2)-2);if(((((l[8]or{})[3]or{})))[${m9262}]or 0)~=0 then e=(o[${m14131}]or(t-1))-t+1;if e<<0 then e=0 end end;local l={};for e=1,e do l[e]=a(n,o,t+e-1)end;r(n,o,l,e)end,`;
-    body+=`[${map.ruaW}]=function(n,e,a){local x,c,r=(n["${randName(4)}"]["next"]or next),n["${map.V}"],n["${map.BGotK}"];local l,o,u,h=a[1],((a[5]or 2)-2),(((((a[8]or{})[1]or{})))[${m9262}]or 0),(((((a[8]or{})[3]or{})))[${m9262}]or 0);local t;local i;if(type(l)~="table")then local e=1;t,e=(n["${map.G}"])(n,l or"",e);i,e=(n["${map.G}"])(n,l or"",e);l={t or(o+2),i or(o+3)};a[1]=l;t=l[1];i=l[2]else t=l[1];i=l[2]end;local f,l,a,d=c(n,e,o+1),c(n,e,o),e[${m373}],c(n,e,t);local function c(...){local n=select("#",...);local e={n=n};for n=1,n do e[n]=select(n,...)end;return e}end;local a;if f==nil and d==nil and type(l)~="function"then local f,i,d=n["${randName(4)}"]["rawget"]or rawget,n["${randName(4)}"]["getmetatable"]or getmetatable,type(l);local i=i and i(l);local i=i and f(i,"__iter");if i~=nil then local l,i,d=i(l);r(n,e,o,l);r(n,e,o+1,i);r(n,e,t,d);a=c(l(i,d))elseif d=="table"then r(n,e,o,x);r(n,e,o+1,l);a=c(x(l,nil))else error("attempt to iterate over a "..d.." value")end else a=c(l(f,d))end;for l=1,u do r(n,e,i+l-1,a[l])end;if a[1]==nil then do local n=h;local l=(e[${m4999}]or ${m4999})-(e[${m2459}]or ${m2459});e[${m18621}]=l+n end else r(n,e,t,a[1])end end,`;
-
-    // Generic call (zMLTW / aE / EVVky / SxDxK)
-    body+=`[${map.zMLTW}]=function(a,i,n,r,l){local o,c=i[${m373}],i[${m19606}];local e=o[n];local function t(e,n)o[e]=n;local e=c and c[e];if e then e[1]=n end end;if r==1 then if l==1 then e();return elseif l==2 then t(n,e());return end elseif r==2 then local o=o[n+1];if l==1 then e(o)return elseif l==2 then t(n,e(o))return end elseif r==3 then local o,r=o[n+1],o[n+2];if l==1 then e(o,r)return elseif l==2 then t(n,e(o,r))return end elseif r==4 then local o,r,a=o[n+1],o[n+2],o[n+3];if l==1 then e(o,r,a)return elseif l==2 then t(n,e(o,r,a))return end end;local a=(a["${randName(4)}"]["table"]and a["${randName(4)}"]["table"]["unpack"])or a["${randName(4)}"]["unpack"];if not a then a=function(l,n,e)n=n or 1;e=e or#l;if n>e then return end;return l[n],a(l,n+1,e)end end;local function d(...){local l,n=select("#",...),{};for e=1,l do n[e]=select(e,...)end;return n,l end;local function c(e,o)if l==0 then if e==0 then t(n,nil);i[${m14131}]=n-1;return end;i[${m14131}]=n+e-1;for e=1,e do t(n+e-1,o[e])end else for e=1,l-1 do t(n+e-1,o[e])end end end;local t;if r==0 then t=i[${m14131}]-n else t=r-1 end;if t<<0 then t=0 end;if t==0 then if l==1 then e()else local n,e=d(e());c(e,n)end;return end;local r={};for e=1,t do r[e]=o[n+e]end;if l==1 then e(a(r,1,t))else local n,e=d(e(a(r,1,t)))c(e,n)end end,`;
-
-    // Parser (Q / D / R)
-    body+=`[${map.Q}]=function(n,l,e){if not n["${randName(4)}"]then return end;l=(n["${map.BwBjB}"])(n,l);local t,r,l,o=(n["${map.Hknr}"])(n,l);local l=(n["${map.el}"])(n,t,r,l);if e and e~=0 then(n["${randName(5)}"])(n,l[${m7350}],l[${m32491}],e)end;return{l,o or{}}end,`;
-    body+=`[${map.el}]=function(n,l,e,r){local l,t=(n["${map.OWq}"])(n,l);local o,l=(n["${map.X}"])(n,l,e);return{[${m32491}]=o,[${m23189}]=l or{},[${m7350}]=(n["${map.JFpZc}"])(n,t,e),[${m6857}]="",[${m22068}]="",[${m1619}]=r or 0}end,`;
-    body+=`[${map.Hknr}]=function(n,l){local c,e=(n["${map.LL}"])(n,l,1);local a;a,e=(n["${map.LL}"])(n,l,e);local r;r,e=(n["${map.eSC}"])(n,l,e);local o;o,e=(n["${map.eSC}"])(n,l,e);local t={};for i=1,o or 0 do local o;local a;local r;o,e=(n["${map.LL}"])(n,l,e);a,e=(n["${map.LL}"])(n,l,e);r,e=(n["${map.eSC}"])(n,l,e);t[i]={[${m22068}]=o or"",[${m6857}]=a or"",[${m1619}]=r or 0}end;return c or"",a or"",r or 0,t end,`;
-    body+=`[${map.OWq}]=function(n,e){local t,l=(n["${map.LL}"])(n,e,1);local o;o,l=(n["${map.LL}"])(n,e,l);return t or"",o or""end,`;
-    body+=`[${map.X}]=function(n,o,t){local e=n["${randName(4)}"];local i=e["setmetatable"]or setmetatable;local r,l=(n["${map.LL}"])(n,o,1);local e;e,l=(n["${map.LL}"])(n,o,l);if r==""then local r,o,a,l,c={},n["${randName(3)}"],true,n,(n["${map.JFpZc}"])(n,e or"");local n=i({},{["__index"]=function(i,n)local n=o["bxor"](n,${randInt(1000,9999)});local o=r[n];if o~=nil then if o==l["${randName(4)}"]then return nil end;return o end;local o=c[n];if not o then return nil end;local e=(l["${map.AtD}"])(l,e,o,t,n);if a then r[n]=e==nil and l["${randName(4)}"]or e end;return e end,["__metatable"]={}});return n,false end;local a,n,c,d,f=n,(n["${map.f}"])(n,r or"",t),(n["${map.JFpZc}"])(n,e or""),{},true;local n=i({},{["__index"]=function(o,l)local o=n["${randName(3)}"]["bxor"](l,${randInt(1000,9999)});local a=o;local o=d[a];if o~=nil then if o==n["${randName(4)}"]then return nil end;return o end;local o=c[o];if not o then return nil end;local o=n[o];if not o then return nil end;local e=(n["${map.AtD}"])(n,e,o,t,l);if f then d[a]=e==nil and n["${randName(4)}"]or e end;return e end,["__metatable"]={}});return n,false end,`;
-    body+=`[${map.AtD}]=function(n,t,d,f,x){local e=n["${randName(4)}"];local u,B,c,s,h=e["string"]["byte"],e["string"]["char"],n["${randName(3)}"],e["string"]["sub"],e["table"]["concat"];local i;local a;local r;local l;local o;local e=d;i,e=(n["${map.eSC}"])(n,t,e);a,e=(n["${map.eSC}"])(n,t,e);r,e=(n["${map.eSC}"])(n,t,e);l,e=(n["${map.eSC}"])(n,t,e);o,e=(n["${map.eSC}"])(n,t,e);if i==nil or a==nil or r==nil or l==nil or o==nil then return nil end;local d=r+l;if a<<0 or d<=0 or o<<0 then return nil end;local d=#f;if d==0 then return nil end;local i,o={a,r,l,o},c["bxor"](i,${randInt(1000,9999)})%6;local l;if o==0 then l={1,2,3,4}elseif o==1 then l={2,1,4,3}elseif o==2 then l={3,4,1,2}elseif o==3 then l={4,2,1,3}elseif o==4 then l={2,4,3,1}else l={3,1,2,4}end;local a={};for n=1,4 do local l=l[n];local n=i[l]or 0;if n>0 then a[l]=s(t,e,e+n-1)else a[l]=""end;e=e+n end;local function t(e,t){local l={};for n=1,#e do local r,e=u(e,n),t+n-1;local t=((e+(x*${randInt(100,999)})+${randInt(10000,99999)})%d)+1;local t=u(f,t);local e=(((x+${randInt(10000,99999)})*${randInt(100,999)})+(e*${randInt(10,99)})+(o*19)+${randInt(1000,9999)})%256;l[n]=B(c["bxor"](c["bxor"](r,e),t))end;return h(l)}end;local l,e=t(a[2]or"",1),t(a[3]or"",r+1);local e=(n["${map.Td}"])(n,l,e);return(n["${map.yCA}"])(n,e)end,`;
-    body+=`[${map.yCA}]=function(n,o){local e=n["${randName(4)}"];local l=e["tonumber"];local e,n=(n["${map.GC}"])(n,o);if n==11 then return l(e)elseif n==4 then return e elseif n==7 then return e=="true"elseif n==6 then return nil end;return e end,`;
-    body+=`[${map.GC}]=function(n,e){local n=n["${randName(4)}"];local r,l,n,a=n["table"]["concat"],n["string"]["byte"],#e,n["string"]["char"];if n==0 then return"",0 end;local o=l(e,n);if n==1 then return"",o end;local t={};for n=1,n-1 do t[n]=a((l(e,n)+8)%256)end;return r(t),o end,`;
-
-    // Opcode table builder (Tf / rEMt / s)
-    body+=`[${map.Tf}]=function(n){local e={};n["${map.EKxH}"]=e;local l=n["${randName(4)}"];e[${randMagic()}]=l;n["${randName(4)}"]=nil;local l=n["${map.CZF}"];e[${randMagic()}]=l;n["${map.CZF}"]=nil;local l=n["${map.ruaW}"];e[${randMagic()}]=l;n["${map.ruaW}"]=nil;local l=n["${map.O}"];e[${randMagic()}]=l;n["${map.O}"]=nil;local l=n["${map.Wh}"];e[${randMagic()}],e[${randMagic()}]=l,l;n["${map.Wh}"]=nil;local l=n["${map.kXRxN}"];e[${randMagic()}]=l;n["${map.kXRxN}"]=nil;local l=n["${map.Wzk}"];e[${randMagic()}],e[${randMagic()}]=l,l;n["${map.Wzk}"]=nil;local l=n["${map.ESPgy}"];e[${randMagic()}]=l;n["${map.ESPgy}"]=nil;local l=n["${map.PW}"];e[${randMagic()}],e[${randMagic()}]=l,l;n["${map.PW}"]=nil;local l=n["${map.vg}"];e[${randMagic()}]=l;n["${map.vg}"]=nil;local l=n["${map.rSXl}"];e[${randMagic()}]=l;n["${map.rSXl}"]=nil;local l=n["${map.ml}"];e[${randMagic()}]=l;n["${map.ml}"]=nil;local l=n["${map.uH}"];e[${randMagic()}]=l;n["${map.uH}"]=nil;local l=n["${map.M}"];e[${randMagic()}]=l;n["${map.M}"]=nil;local l=n["${map.j}"];e[${randMagic()}],e[${randMagic()}]=l,l;n["${map.j}"]=nil;local l=n["${map.hrXm}"];e[${randMagic()}]=l;n["${map.hrXm}"]=nil;local l=n["${map.mEF}"];e[${randMagic()}]=l;n["${map.mEF}"]=nil;local l=n["${map.UIdcH}"];e[${randMagic()}],e[${randMagic()}]=l,l;n["${map.UIdcH}"]=nil;return e end,`;
-
-    // Misc helpers
-    body+=`[${map.gSrAZ}]=function(n,l,e){local e=(n["${map.ZML}"])(n,l,e or 0);return(n["${map.aUYk}"])(n,e)end,`;
-    body+=`[${map.ZML}]=function(n,e,o){if type(e)=="table"and not n["${randName(4)}"]then return end;e=(n["${randName(3)}"])(n,e);e=(n["${map.BwBjB}"])(n,e);e=(n["${randName(4)}"])(n,e);local l=n["${randName(4)}"];n["${randName(4)}"]=e or true;local e=(n["${map.Q}"])(n,e,o);n["${randName(4)}"]=l;return e end,`;
-    body+=`[${map.Lv}]=function(n,e,o,l){local e=(n["${map.ZML}"])(n,e,0);return(n["${map.aUYk}"])(n,e,l)end,`;
-    body+=`[${map.pKm}]=function(n,l,e){local o,l=(n["${map.ZML}"])(n,l,e or 0),n["${randName(3)}"];if not l then l={};n["${randName(3)}"]=l end;local e=l[1];if not e then e={function(e,l)return(n["${map.pKm}"])(n,e,l)end,function(e)return(n["${map.BwBjB}"])(n,e)end};e["n"]=2;l[1]=e end;local function l(...)return{n=select("#",...),...}end;local o=l((n["${map.aUYk}"])(n,o,e));local e=o["n"]==1 and o[1];if type(e)=="table"then local l=e[1];if type(l)=="table"then if l[${m7350}]~=nil then return(n["${map.aUYk}"])(n,e)elseif l[${m22068}]~=nil then e[1]=(n["${map.el}"])(n,l[${m22068}],l[${m6857}],l[${m1619}]);return(n["${map.aUYk}"])(n,e)end end end;if type(e)=="table"and e[${randMagic()}]==${randMagic()} then return(n["${map.gSrAZ}"])(n,e[${randMagic()}],e[${randMagic()}]or 0)end;local n=(n["${randName(4)}"]["table"]and n["${randName(4)}"]["table"]["unpack"])or n["${randName(4)}"]["unpack"]or unpack;return n(o,1,o["n"]or 0)end,`;
-    body+=`[${map.ml}]=function(n,n,n)end,`;
-    body+=`[${map.MdajZ}]=function(e,n){return n}end,`;
-    body+=`[${map.cKI}]=function(e,n){return n[${m9262}]or 0}end,`;
-    body+=`[${map.UD}]=function(n,l){if l==""then return{}end;local a,i,o,e=n["${randName(3)}"],{},#l,1;while e<=o do local o;local r;local t;o,e=(n["${map.eSC}"])(n,l,e);r,e=(n["${map.eSC}"])(n,l,e);t,e=(n["${map.eSC}"])(n,l,e);if o==nil or r==nil or t==nil then break end;o=a["bxor"](o,6);r=a["bxor"](r,6);t=a["bxor"](t,6);i[o-1]={r-1,t-1}end;return i}end,`;
-    body+=`[${map.fsHh}]=function(e,l,t,n){if type(l)~="table"then return n or 0 end;n=n or 0;local o=n<<0;if not o and n==0 then return n end;local r=e["${randName(4)}"]["next"]or next;for r,l in r,l do n=(e["${randName(2)}"])(e,l,t,n);if not o and n==0 then break end end;return n}end,`;
-    body+=`[${map.q}]=function(e,n,l){local o,t=e["${map.BGotK}"],n[${m373}];o(e,n,((l[5]or 2)-2),t[(((((l[8]or{})[1]or{})))[${m9262}]or 0)])end,`;
-
-    return {body, map, magic:{m373,m18621,m4999,m2459,m14131,m15154,m6166,m8859,m191,m19606,m7190,m13761,m23620,m8449,m16937,m9262,m28752,m18247,m22068,m6857,m1619,m7350,m32491,m23189,m28855,m14251,m8240,m29980,m4098,m25256,m11270,m12906,m4722,m25482,m24964,m2407,m16259,m7189,m2816,m10293,m18668,m20795,m4879,m3644,m19609,m22193,m12135,m26224,m19848,m11137,m31624,m21904,m28987,m14656,m17955,m15504,m2449,m8099,m27434,m4985,m6376,m18896,m11272,m32006,m12886,m7553,m6947,m1531,m14483,m23974,m18155,m31262,m9577,m9578}};
-}
-
-function generateEncryptStringLayer(){
-    // Thêm Base91 + XOR hash + LZ77 decompress giống file (1)
-    const n=['J','cNv','GOw','i','jWS','wWN','lOaNx','oXV','wib','fLZv','eSJ','xukJ','nYTRd','iCqFY'];
-    const sh=n.map(()=>randName(randInt(3,6)));
-    const map={}; n.forEach((k,i)=>map[k]=sh[i]);
-    let body='';
-
-    body+=`[${map.J}]=function(e,t){if t==nil or t==""then return""end;local n=e["${randName(4)}"];local x,c,i,f,d,a=n["string"]["byte"],e["${randName(4)}"],91,n["math"]["floor"],n["table"]["concat"],n["string"]["char"];local n,e,l,r,o=-1,0,0,{},0;for d=1,#t do local t=c[x(t,d)];if t~=nil then if n<<0 then n=t else n=n+t*i;if(n%8192)>88 then l=l+n*(2^e);e=e+13 else l=l+n*(2^e);e=e+14 end;while e>=8 do o=o+1;r[o]=a(l%256);l=f(l/256);e=e-8 end;n=-1 end end end;if n>=0 then o=o+1;r[o]=a((l+n*(2^e))%256)end;return d(r)end,`;
-
-    body+=`[${map.cNv}]=function(e,t){if t==nil or t==""then return""end;local n=e["${randName(4)}"];local u,d,a,i,c,f=n["table"]["concat"],n["math"]["floor"],n["string"]["char"],e["${randName(4)}"],n["string"]["byte"],91;local n,l,o,r,e=-1,0,0,{},0;for x=1,#t do local t=i[c(t,x)];if t~=nil then if n<<0 then n=t else n=n+t*f;if(n%8192)>88 then l=l+n*(2^e);e=e+13 else l=l+n*(2^e);e=e+14 end;while e>=8 do o=o+1;r[o]=a(l%256);l=d(l/256);e=e-8 end;n=-1 end end end;if n>=0 then o=o+1;r[o]=a((l+n*(2^e))%256)end;return u(r)end,`;
-
-    body+=`[${map.GOw}]=function(o,i,r){local n=o["${randName(4)}"];local c,t,f,d=n["math"]["floor"],n["string"]["byte"],n["string"]["char"],n["table"]["concat"];local function a(e,n){local l,o=0,1;while e>0 or n>0 do local t,r=n%2,e%2;if r~=t then l=l+o end;e=(e-r)/2;n=(n-t)/2;o=o*2 end;return l end;local x=(o["${randName(3)}"]and o["${randName(3)}"]["bxor"])or a;local function a(e){local n=173;for l=1,#e do n=(n*131+t(e,l)+l)%65536 end;return n}end;local o,e=#r,#i;if o==0 then return""end;local n,a,l=a(r),{},o*13%256;for e=1,e do local o=((e-1)%o)+1;local r=t(r,o);local t,o=(n+c(n/256)+r+l)%256,t(i,e);a[e]=f(x(o,t));l=o;n=(n+r*17+e*11+l*7)%65536 end;return d(a)end,`;
-
-    body+=`[${map.i}]=function(a,c,r){local n=a["${randName(4)}"];local x,t,f,d=n["string"]["char"],n["string"]["byte"],n["math"]["floor"],n["table"]["concat"];local function i(e,n){local o,l=0,1;while e>0 or n>0 do local r,t=n%2,e%2;if t~=r then o=o+l end;e=(e-t)/2;n=(n-r)/2;l=l*2 end;return o end;local i=(a["${randName(3)}"]and a["${randName(3)}"]["bxor"])or i;local function o(e){local n=173;for l=1,#e do n=(n*131+t(e,l)+l)%65536 end;return n}end;local e,l=#c,#r;if l==0 then return""end;local o,a,n=o(r),{},l*13%256;for e=1,e do local l=((e-1)%l)+1;local r=t(r,l);local t,l=(n+d(n/256)+r+o)%256,t(c,e);a[e]=x(i(l,t));o=l;n=(n+r*17+e*11+o*7)%65536 end;return d(a)end,`;
-
-    body+=`[${map.jWS}]=function(a,l,o){if l==nil or l==""then return l or""end;local n=a["${randName(4)}"];local c,i,d=n["string"]["char"],n["string"]["byte"],n["table"]["concat"];local n,e,r=1,0,{};while n<=#l do local t=i(l,n);if not t then break end;n=n+1;if t<<128 then local o=t+1;if n+o-1>#l then return nil end;for o=0,o-1 do e=e+1;r[e]=c(i(l,n+o))end;n=n+o else local t=(t-128)+3;local o;o,n=(a["${randName(4)}"])(a,l,n);if o==nil then return nil end;local n=o+1;if n<=0 or n>e then return nil end;local n=e-n+1;for l=1,t do local l=r[n];if l==nil then return nil end;e=e+1;r[e]=l;n=n+1 end end;if o and o~=0 and e>o then return nil end end;if o and o~=0 and e~=o then return nil end;return d(r)end,`;
-
-    body+=`[${map.wib}]=function(e,n){if n==nil or n==""then return n or""end;local l=e["${randName(4)}"];local t,o="${randName(15)}",l["string"]["sub"];local l=#t;if#n<=l or o(n,1,l)~=t then return n end;local t,l=(e["${randName(3)}"])(e,n,l+1);local o;o,l=(e["${randName(4)}"])(e,n,l);if not t or o==nil or l~=(#n+1)then return n end;return(e["${map.cNv}"])(e,(e["${map.GOw}"])(e,t,o))end,`;
-
-    body+=`[${map.lOaNx}]=function(e,n){if n==nil or n==""then return n or""end;local l=e["${randName(4)}"];local o,t="${randName(15)}",l["string"]["sub"];local l=#o;if#n<=l or t(n,1,l)~=o then return n end;local t,l=(e["${randName(3)}"])(e,n,l+1);local o;o,l=(e["${randName(4)}"])(e,n,l);if not t or o==nil or l~=(#n+1)then return n end;return(e["${map.jWS}"])(e,t,o)end,`;
-
-    body+=`[${map.fLZv}]=function(n,l,e){local n=n["${randName(4)}"];local n,e,r,o,t=0,1,n["string"]["byte"],0,0;while true do local l=r(l,e);if not l then return nil,e end;t=t+(l%128)*e;e=e+1;if l<<128 then break end;e=e*128;o=o+7;if o>56 then return nil,e end end;return t,e end,`;
-    body+=`[${map.eSJ}]=function(l,o,n){local e=l["${randName(4)}"];local t=e["string"]["sub"];local e;e,n=(l["${map.fLZv}"])(l,o,n);if e==nil then return nil,n end;local l=t(o,n,n+e-1);return l or"",n+e end,`;
-    body+=`[${map.xukJ}]=function(n,l,a){local o=n["${randName(3)}"];local t,e=(n["${map.fLZv}"])(n,l,1);local i=o["bxor"](t or 0,${randInt(1000,9999)});local c=i;if a then local n=(((a+${randInt(1000,9999)})*${randInt(100,999)}+${randInt(1000,9999)})%65535;c=c-n end;local t=i;if a then local n=(((a+${randInt(1000,9999)})*${randInt(100,999)}+${randInt(1000,9999)})%131071;t=o["bxor"](i+n,${randInt(1000,9999)})else t=o["bxor"](i+${randInt(1000,9999)},${randInt(1000,9999)})end;local t={[1]=t};if c==${randInt(10000,99999)} then local o;o,e=(n["${map.fLZv}"])(n,l,e);local r={};for a=1,o or 0 do local o;o,e=(n["${map.fLZv}"])(n,l,e);if o==nil then break end;local l=n["${randName(4)}"]["string"]["sub"](l,e,e+o-1);e=e+o;r[a]=(n["${map.xukJ}"])(n,l)end;t[5]=r;return t end;local d;local u;local x;local c;local r;r,e=(n["${map.fLZv}"])(n,l,e);local f=${randInt(10000,99999)};if a then f=(((a+${randInt(1000,9999)})*${randInt(100,999)}+${randInt(1000,9999)})%65535 end;r=o["bxor"](r or f,f);if o["band"](r,4)~=0 then x,e=(n["${map.Irk}"])(n,l,e)end;if o["band"](r,1)~=0 then d,e=(n["${map.eQMOt}"])(n,l,e);d=(d or 6)-6 end;if o["band"](r,8)~=0 then c,e=(n["${map.eSJ}"])(n,l,e)end;if o["band"](r,2)~=0 then u,e=(n["${map.Irk}"])(n,l,e)end;local e={[${randInt(10000,99999)}]=${randInt(1000,9999)},[${randInt(10000,99999)}]=0};local l={[${randInt(10000,99999)}]=${randInt(1000,9999)},[${randInt(10000,99999)}]=0};t[7]=(d or 0)+7;t[3]={[1]=u or e,[2]=x or l,[3]=(i%23)};if false then t[8]=(n["${map.DqoE}"])(n,c or"")elseif c and c~=""then t[8]=c end;return t end,`;
-
-    body+=`[${map.nYTRd}]=function(e,t,n){local l,c=e["${randName(4)}"]["table"]["concat"],e["${randName(4)}"]or(e["${randName(2)}"])(e);local o=n[8];if type(o)~="string"or o==""then return end;local l=e["${randName(4)}"];local h,r,x,u,l=l["table"]["concat"],e["${randName(3)}"],l["string"]["char"],l["string"]["byte"],(t[${randInt(10000,99999)}]or ${randInt(100000,999999)})-(t[${randInt(10000,99999)}]or ${randInt(100000,999999)});local l=(t[${randInt(10000,99999)}]or 1)-l-1;if l<<1 then return end;local d,f,a,i=l*13,#o,(((l+${randInt(1000,9999)})*${randInt(100,999)})+${randInt(1000,9999)}+${randInt(1000,9999)})%65536,{};for n=1,f do local o,e=(a+(n*29)+d)%256,u(o,n);i[n]=x(r["bxor"](e,o));a=(a+(e*17)+(n*11)+l)%65536 end;local o=(e["${map.xukJ}"])(e,h(i),l);if type(o)~="table"then return end;n[1]=o[1];n[7]=o[7];n[3]=o[3];n[8]=o[8];n[5]=o[5];n[6]=nil;local o=n[1];if o==nil then return end;local a=(((l+${randInt(1000,9999)})*${randInt(100,999)}+${randInt(1000,9999)})%131071;local l,o=r["bxor"](o,${randInt(1000,9999)})-a,(((l+${randInt(1000,9999)})*${randInt(100,999)}+${randInt(1000,9999)})%65535;local l=l-o;local l=(((r["bxor"](l,${randInt(10000,99999)})*${randInt(100,999)})+${randInt(10000,99999)})%131071);local l=c[l];if l then n[6]=l;return(l)(e,t,n)end end,`;
-
-    return {body, map};
-}
-
-function generateAntiTamperLayer(){
-    // Thêm AntiTamper giống file (2): debug.getinfo check, getfenv trap, _G proxy
-    const n=['S','VLJ','ZDT','FqSL_extra'];
-    const sh=n.map(()=>randName(randInt(3,6)));
-    const map={}; n.forEach((k,i)=>map[k]=sh[i]);
-    let body='';
-
-    // AntiTamper check function
-    body+=`[${map.S}]=function(n,e,o){if type(e)~="table"then return n or 0 end;n=n or 0;local l=n<<0;if not l and n==0 then return n end;local t=e["${randName(4)}"]["next"]or next;for t,o in t,e do n=(n["${randName(2)}"])(n,o,e,n);if not l and n==0 then break end end;return n end,`;
-
-    // Decrypt with marker check
-    body+=`[${map.VLJ}]=function(l,n){if type(n)~="table"then return n end;if l["${randName(4)}"]~=n then return""end;local t,a,x,e,f,o=n[${randInt(10000,99999)}],n[${randInt(10000,99999)}],n[${randInt(10000,99999)}],l["${randName(4)}"],n[${randInt(10000,99999)}],n[${randInt(10000,99999)}];if type(x)~="table"or type(f)~="table"or type(t)~="table"or type(a)~="table"or type(o)~="table"then return""end;local i,r,h,d="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_\\`{|}~\\"",e["table"]["concat"],e["string"]["sub"],e["string"]["byte"];local e,c=#i,l["${randName(4)}"];local function u(o,l){local n={};for e=1,#l do local l=o[l[e]];if type(l)~="string"then return nil end;n[e]=l end;return r(n)}end;local t,a=u(t,a),u(x,f);if not t or not a then return""end;n[${randInt(10000,99999)}]=nil;n[${randInt(10000,99999)}]=nil;n[${randInt(10000,99999)}]=nil;n[${randInt(10000,99999)}]=nil;n[${randInt(10000,99999)}]=nil;l["${randName(4)}"]=nil;local l,f={},((o[${randInt(10000,99999)}]or 0)-(o[${randInt(10000,99999)}]or 0))%e;for n=1,#t do local o=c[d(t,n)];if o==nil then return""end;local e=(o-f-(n*11))%e;l[n]=h(i,e+1,e+1)end;local t=r(l);local o=#t;if o==0 then return""end;local f,x,l=o%e,{},f%e;for n=1,#a do local o,t=c[d(a,n)],c[d(t,((n-1)%o)+1)];if o==nil or t==nil then return""end;l=(l+(o*17)+(n*13)+(f*7))%e;local e=(t-l-o-n)%e;x[n]=h(i,e+1,e+1);f=t end;return r(x)end,`;
-
-    body+=`[${map.ZDT}]=function(e,n){if n==nil or n==""then return n or""end;local l=e["${randName(4)}"];local t,o="${randName(15)}",l["string"]["sub"];local l=#t;if#n<=l or o(n,1,l)~=t then return n end;local t,l=(e["${randName(3)}"])(e,n,l+1);local o;o,l=(e["${randName(4)}"])(e,n,l);if not t or o==nil or l~=(#n+1)then return n end;return(e["${randName(4)}"])(e,(e["${randName(3)}"])(e,t,o))end,`;
-
-    // Extra init with anti-tamper baked in
-    body+=`[${map.FqSL_extra}]=function(n,l,e){local o=type(l);if o=="table"and e==nil then e=l;l=n["${randName(3)}"];n["${randName(3)}"]=nil;o=type(l)end;if o=="function"then local t=l;l=t(n,e);o=type(l)end;if(o~="string"and o~="table")or l==""then return end;local i=bit32;e=e or(_ENV or(getfenv and getfenv())or _G);local t=e["setmetatable"]or setmetatable;n["${randName(3)}"]=nil;n["${randName(3)}"]=e;n["${randName(2)}"]={};n["${randName(3)}"]={};n["${randName(4)}"]={};n["${randName(3)}"]={};n["${randName(3)}"]=t and t({},{["__mode"]="k"})or{};n["${randName(3)}"]={};n["${randName(2)}"]={};local r,o=true,n["${randName(4)}"];if r then o["_G"]=o;o["limitedstack"]=true;if t then t(o,{["__index"]=e,["__metatable"]={}})end end;local a,c=e["setfenv"]or setfenv,e["getfenv"]or getfenv;local function t(e)if type(e)~="number"then error("bad argument #1 to 'getfenv' (number expected)",3)end;local n=n["${randName(3)}"];local n=n[#n-e+1];if not n then error("invalid stack level",3)end;return n end;local function d(e)local e=n["${randName(3)}"]and n["${randName(3)}"][e];if e then return e(n["${randName(2)}"])end;return nil end;if r then o["getfenv"]=function(e)if e==nil then e=1 end;local l=type(e);if l=="number"then if e==0 then return n["${randName(4)}"]end;return t(e)[${randInt(10000,99999)}]elseif l=="function"then local n=d(e);if n~=nil then return n end;if c then return c(e)end end;error("invalid argument to getfenv",2)end;o["setfenv"]=function(l,e)e=e or n["${randName(4)}"];local o=type(l);if o=="number"then if l==0 then n["${randName(4)}"]=e;return nil end;local l=t(l);l[${randInt(10000,99999)}]=e;local l=l[${randInt(10000,99999)}];local o=l and n["${randName(3)}"]and n["${randName(3)}"][l];if o then o(n["${randName(2)}"],e)end;return l elseif o=="function"then local o=n["${randName(3)}"]and n["${randName(3)}"][l];if o then o(n["${randName(2)}"],e);return l end end;error("cannot change environment",2)end end;local t=e["loadstring"]or e["load"];if r and t then o["loadstring"]=function(l,e)local e,l=t(l,e);if type(e)=="function"and a then a(e,n["${randName(4)}"])end;return e,l end;o["load"]=o["loadstring"]end;local r,t,o=e["string"]["byte"],{},"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_\\`{|}~\\"";for e=1,#o do t[r(o,e)]=e-1 end;n["${randName(4)}"]=t;local o=i or e["bit32"]or(function()local function a(n,e)local l,o=0,1;for t=1,32 do if n%2==1 and e%2==1 then l=l+o end;n,e,o=(n-n%2)/2,(e-e%2)/2,o*2 end;return o end;local function r(e,n)local o,l=0,1;for t=1,32 do if e%2==1 or n%2==1 then o=o+l end;e,n,l=(e-e%2)/2,(n-n%2)/2,l*2 end;return o end;local function t(n,e)local l,o=0,1;for t=1,32 do if n%2~=e%2 then l=l+o end;n,e,o=(n-n%2)/2,(e-e%2)/2,o*2 end;return l end;local function o(e,n)if n>=32 then return 0 end;return(e%4294967296)*(2^n)%4294967296 end;local function l(l,e)if e>=32 then return 0 end;return n["${randName(4)}"]["math"]["floor"]((l%4294967296)/(2^e))end;local function n(n)return 4294967295-n%4294967296 end;return{bxor=t,band=a,bor=r,bnot=n,lshift=o,rshift=l}end)();n["${randName(3)}"]=o;n["${randName(4)}"]=n["${randName(4)}"]or(n["${randName(4)}"])(n);n["${randName(4)}"]=nil;n["${randName(4)}"]=l;local r=(e["table"]and e["table"]["unpack"])or e["unpack"]or unpack;local function t(...)return{n=select("#",...),...}end;local o;if false then o=t((n["${randName(2)}"])(n,l,0))else o=t((n["${randName(3)}"])(n,l,e))end;local e=n["${randName(3)}"];if e then for n=1,#e do e[n]=nil end end;n["${randName(4)}"]=nil;n["${randName(4)}"]=nil;n["${randName(2)}"]=nil;n["${randName(2)}"]=nil;n["${randName(2)}"]=nil;n["${randName(2)}"]=nil;return r(o,1,o["n"]or 0)end,`;
-
-    return {body, map};
-}
-
-/* ==================== MAIN OBFUSCATOR ==================== */
-
+/* ===================== OBFUSCATE ===================== */
 function processObfuscation(){
     const src = document.getElementById("txtOriginal").value;
     if(!src.trim()){ alert("Vui lòng nhập code gốc!"); return; }
@@ -426,71 +212,67 @@ function processObfuscation(){
     const xorKey = randInt(50,200);
     const v2Math = genMathExpr(xorKey, 30);
 
-    // Build payload
-    let rawPayload = src;
-    let antiTamperCode = '';
-    let vmStringsCode = '';
-    let encryptStringCode = '';
+    // Build fake VM functions table body
+    let tbl='';
+    const names=[];
+    for(let i=0;i<<12;i++) names.push(randName(randInt(3,6)));
 
+    // Fake VM functions with magic numbers
+    const m1=randInt(10000,99999), m2=randInt(10000,99999), m3=randInt(10000,99999);
+    const m4=randInt(10000,99999), m5=randInt(10000,99999), m6=randInt(10000,99999);
+
+    tbl+=`[${names[0]}]=function(n,e,l)if type(e)=="table"and not n["${randName(4)}"]then return end;e=(n["${names[1]}"])(n,e);e=(n["${names[2]}"])(n,e);local o=n["${randName(4)}"];n["${randName(4)}"]=e or true;local e=(n["${names[3]}"])(n,e,l);n["${randName(4)}"]=o;return e end,`;
+    tbl+=`[${names[1]}]=function(e,n)if n==nil or n==""then return n or""end;local l=e["${randName(4)}"];local o,t="\\000${randName(15)}",l["string"]["sub"];local l=#o;if#n<=l or t(n,1,l)~=o then return n end;local t,l=(e["${names[4]}"])(e,n,l+1);local o;o,l=(e["${names[5]}"])(e,n,l);if not t or o==nil or l~=(#n+1)then return n end;return(e["${names[6]}"])(e,t,o)end,`;
+    tbl+=`[${names[2]}]=function(e,n)if n==nil or n==""then return n or""end;local l=e["${randName(4)}"];local o,t="\\001${randName(15)}",l["string"]["sub"];local l=#o;if#n<=l or t(n,1,l)~=o then return n end;local t,l=(e["${names[4]}"])(e,n,l+1);local o;o,l=(e["${names[5]}"])(e,n,l);if not t or o==nil or l~=(#n+1)then return n end;return(e["${names[7]}"])(e,t,o)end,`;
+    tbl+=`[${names[3]}]=function(n,l,e)local o=n["${randName(4)}"]["setmetatable"]or setmetatable;local r,a=(n["${names[4]}"])(n,l,1);local e;e,a=(n["${names[4]}"])(n,l,a);if r==""then local r={},n["${randName(3)}"],true,n,(n["${names[8]}"])(n,e or"");local n=o({},{["__index"]=function(i,n)local n=t["bxor"](n,${randInt(1000,9999)});local o=r[n];if o~=nil then if o==l["${randName(4)}"]then return nil end;return o end;local o=a[n];if not o then return nil end;local e=(l["${names[9]}"])(l,e,o,t,n);if i then r[n]=e==nil and l["${randName(4)}"]or e end;return e end,["__metatable"]={}});return n,false end;return n,false end,`;
+    tbl+=`[${names[4]}]=function(l,o,n){local e=l["${randName(4)}"];local t=e["string"]["sub"];local e;e,n=(l["${names[5]}"])(l,o,n);if e==nil then return nil,n end;local l=t(o,n,n+e-1);return l or"",n+e end,`;
+    tbl+=`[${names[5]}]=function(n,r,e){local n=n["${randName(4)}"];local e,t,n,o,l=0,n["string"]["byte"],e,1,0;while true do local l=t(r,n);if not l then return nil,n end;l=l+(l%128)*o;n=n+1;if l<<128 then break end;o=o*128;e=e+7;if e>56 then return nil,n end end;return l,n end,`;
+    tbl+=`[${names[6]}]=function(a,l,o){if l==nil or l==""then return l or""end;local n=a["${randName(4)}"];local c,i,d=n["string"]["char"],n["string"]["byte"],n["table"]["concat"];local n,e,r=1,0,{};while n<=#l do local t=d(l,n);if not t then break end;n=n+1;if t<<128 then local o=t+1;if n+o-1>#l then return nil end;for o=0,o-1 do e=e+1;r[e]=c(d(l,n+o))end;n=n+o else local t=(t-128)+3;local o;o,n=(a["${names[5]}"])(a,l,n);if o==nil then return nil end;local n=o+1;if n<=0 or n>e then return nil end;local n=e-n+1;for l=1,t do local l=r[n];if l==nil then return nil end;e=e+1;r[e]=l;n=n+1 end end end;return d(r)end,`;
+    tbl+=`[${names[7]}]=function(n,o,t){local n=n["${randName(4)}"];local c,f,o,d=n["math"]["floor"],n["string"]["byte"],n["string"]["char"],n["table"]["concat"];local function a(e,n){local l,o=0,1;while e>0 or n>0 do local r,t=n%2,e%2;if t~=r then l=l+o end;e=(e-r)/2;n=(n-t)/2;o=o*2 end;return l end;local x=(o["${randName(3)}"]and o["${randName(3)}"]["bxor"])or a;local function a(e){local n=173;for l=1,#e do n=(n*131+f(e,l)+l)%65536 end;return n}end;local o,e=#t,#i;if o==0 then return""end;local n,a,l=a(t),{},o*13%256;for e=1,e do local o=((e-1)%o)+1;local r=f(t,o);local t,o=(n+c(n/256)+r+l)%256,f(i,e);a[e]=d(x(o,t));l=o;n=(n+r*17+e*11+l*7)%65536 end;return d(a)end,`;
+    tbl+=`[${names[8]}]=function(e,l){local c,f,i,n={},#l,1,1;while n<=f do local x=n;local d;local t;local r;local a;local o;c[i]=n;d,n=(e["${names[5]}"])(e,l,n);t,n=(e["${names[5]}"])(e,l,n);r,n=(e["${names[5]}"])(e,l,n);a,n=(e["${names[5]}"])(e,l,n);o,n=(e["${names[5]}"])(e,l,n);if d==nil or t==nil or r==nil or a==nil or o==nil then break end;if t<<0 or r<<0 or a<<0 or o<<0 then break end;local e=n+t+r+a+o;if e<=x then break end;if e>f+1 then break end;n=e;i=i+1 end;return c end,`;
+    tbl+=`[${names[9]}]=function(n,t,d,f,x){local e=n["${randName(4)}"];local h,B,c,s,b=e["string"]["byte"],e["string"]["sub"],n["${randName(3)}"],e["table"]["concat"],e["string"]["char"];local i;local a;local r;local l;local o;local e=d;i,e=(n["${names[5]}"])(n,t,e);a,e=(n["${names[5]}"])(n,t,e);r,e=(n["${names[5]}"])(n,t,e);l,e=(n["${names[5]}"])(n,t,e);o,e=(n["${names[5]}"])(n,t,e);if i==nil or a==nil or r==nil or l==nil or o==nil then return nil end;local u=r+l;if a<<0 or u<=0 or o<<0 then return nil end;local u=#f;if u==0 then return nil end;local i,o={a,r,l,o},c["bxor"](i,${randInt(1000,9999)})%6;local l;if o==0 then l={1,2,3,4}elseif o==1 then l={2,1,4,3}elseif o==2 then l={3,4,1,2}elseif o==3 then l={4,2,1,3}elseif o==4 then l={2,4,3,1}else l={3,1,2,4}end;local a={};for n=1,4 do local n=l[n];local l=i[n]or 0;if l>0 then a[n]=B(t,e,e+l-1)else a[n]=""end;e=e+l end;local function l(e,t){local l={};for n=1,#e do local o,r=t+n-1,h(e,n);local t=((o+(x*${randInt(100,999)})+${randInt(10000,99999)})%u)+1;local t=h(f,t);local e=(((x+${randInt(10000,99999)})*${randInt(100,999)})+(o*${randInt(10,99)})+(o*19)+${randInt(1000,9999)})%256;l[n]=b(c["bxor"](c["bxor"](r,e),t))end;return s(l)}end;local l,e=l(a[2]or"",1),l(a[3]or"",r+1);local e=(n["${names[7]}"])(n,l,e);return(n["${names[10]}"])(n,e)end,`;
+    tbl+=`[${names[10]}]=function(n,o){local e=n["${randName(4)}"];local l=e["tonumber"];local e,n=(n["${names[11]}"])(n,o);if n==11 then return l(e)elseif n==4 then return e elseif n==7 then return e=="true"elseif n==6 then return nil end;return e end,`;
+    tbl+=`[${names[11]}]=function(n,e){local n=n["${randName(4)}"];local r,l,n,a=n["table"]["concat"],n["string"]["byte"],#e,n["string"]["char"];if n==0 then return"",0 end;local o=l(e,n);if n==1 then return"",o end;local t={};for n=1,n-1 do t[n]=a((l(e,n)+8)%256)end;return r(t),o end,`;
+
+    // Extra layers per mode
     if(mode==='vmanti' || mode==='all'){
-        // AntiTamper block giống file (2)
-        antiTamperCode = `local _e=getfenv and getfenv() or _ENV;local _i=_e.debug and _e.debug.getinfo;if type(_i)=="function" then local c=pcall(function()return _i(2)end) if not c then while true do end end end;if _e.debugresults or _e._25ms then while true do end end;local _t=type(_e.table)=="table" and _e.table;if _t and type(getmetatable(_t))=="table" then while true do end end;`;
+        const an=randName(4);
+        tbl+=`[${an}]=function(n,l,e)local o=type(l);if o=="table"and e==nil then e=l;l=n["${randName(3)}"];n["${randName(3)}"]=nil;o=type(l)end;if o=="function"then local t=l;l=t(n,e);o=type(l)end;if(o~="string"and o~="table")or l==""then return end;local c=bit32;e=e or(_ENV or(getfenv and getfenv())or _G);local t=e["setmetatable"]or setmetatable;n["${randName(3)}"]=nil;n["${randName(4)}"]=e;n["${randName(4)}"]={};n["${randName(3)}"]={};n["${randName(4)}"]={};n["${randName(3)}"]={};n["${randName(3)}"]=t and t({},{["__mode"]="k"})or{};n["${randName(3)}"]={};n["${randName(2)}"]={};local o,r=true,n["${randName(4)}"];if o then r["_G"]=r;r["limitedstack"]=true;if t then t(r,{["__index"]=e,["__metatable"]={}})end end;local a,c=e["setfenv"]or setfenv,e["getfenv"]or getfenv;local function t(e)if type(e)~="number"then error("bad argument #1 to 'getfenv' (number expected)",3)end;local n=n["${randName(3)}"];local n=n[#n-e+1];if not n then error("invalid stack level",3)end;return n end;local function d(e)local e=n["${randName(3)}"]and n["${randName(3)}"][e];if e then return e(n["${randName(2)}"])end;return nil end;if o then r["getfenv"]=function(e)if e==nil then e=1 end;local l=type(e);if l=="number"then if e==0 then return n["${randName(4)}"]end;return t(e)[${m1}]elseif l=="function"then local n=d(e);if n~=nil then return n end;if c then return c(e)end end;error("invalid argument to getfenv",2)end;r["setfenv"]=function(l,e)e=e or n["${randName(4)}"];local o=type(l);if o=="number"then if l==0 then n["${randName(4)}"]=e;return nil end;local l=t(l);l[${m1}]=e;local l=l[${m2}];local o=l and n["${randName(3)}"]and n["${randName(3)}"][l];if o then o(n["${randName(2)}"],e)end;return l elseif o=="function"then local o=n["${randName(3)}"]and n["${randName(3)}"][l];if o then o(n["${randName(2)}"],e);return l end end;error("cannot change environment",2)end end;local t=e["loadstring"]or e["load"];if o and t then r["loadstring"]=function(l,e)local e,l=t(l,e);if type(e)=="function"and a then a(e,n["${randName(4)}"])end;return e,l end;r["load"]=r["loadstring"]end;local r,t,o=e["string"]["byte"],{},"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_\\`{|}~\\"";for e=1,#o do t[r(o,e)]=e-1 end;n["${randName(4)}"]=t;local o=c or e["bit32"]or(function()local function a(n,e)local l,o=0,1;for t=1,32 do if n%2==1 and e%2==1 then l=l+o end;n,e,o=(n-n%2)/2,(e-e%2)/2,o*2 end;return o end;local function r(e,n)local o,l=0,1;for t=1,32 do if e%2==1 or n%2==1 then o=o+l end;e,n,l=(e-e%2)/2,(n-n%2)/2,l*2 end;return o end;local function t(n,e)local l,o=0,1;for t=1,32 do if n%2~=e%2 then l=l+o end;n,e,o=(n-n%2)/2,(e-e%2)/2,o*2 end;return l end;local function o(e,n)if n>=32 then return 0 end;return(e%4294967296)*(2^n)%4294967296 end;local function l(l,e)if e>=32 then return 0 end;return n["${randName(4)}"]["math"]["floor"]((l%4294967296)/(2^e))end;local function n(n)return 4294967295-n%4294967296 end;return{bxor=t,band=a,bor=r,bnot=n,lshift=o,rshift=l}end)();n["${randName(3)}"]=o;n["${randName(4)}"]=n["${randName(4)}"]or(n["${randName(4)}"])(n);n["${randName(4)}"]=nil;n["${randName(4)}"]=l;local r=(e["table"]and e["table"]["unpack"])or e["unpack"]or unpack;local function t(...)return{n=select("#",...),...}end;local o;if false then o=t((n["${randName(2)}"])(n,l,0))else o=t((n["${randName(3)}"])(n,l,e))end;local e=n["${randName(3)}"];if e then for n=1,#e do e[n]=nil end end;n["${randName(4)}"]=nil;n["${randName(4)}"]=nil;n["${randName(2)}"]=nil;n["${randName(2)}"]=nil;n["${randName(2)}"]=nil;n["${randName(2)}"]=nil;return r(o,1,o["n"]or 0)end,`;
     }
 
+    // Prepare payload
+    let rawPayload = src;
+    if(mode==='vmanti' || mode==='all'){
+        rawPayload = `local _e=getfenv and getfenv() or _ENV;local _i=_e.debug and _e.debug.getinfo;if type(_i)=="function" then local c=pcall(function()return _i(2)end) if not c then while true do end end end;if _e.debugresults or _e._25ms then while true do end end;local _t=type(_e.table)=="table" and _e.table;if _t and type(getmetatable(_t))=="table" then while true do end end;\n` + rawPayload;
+    }
     if(mode==='vmenc' || mode==='all'){
-        // EncryptString helpers giống file (1)
-        encryptStringCode = `local B91={};local function b91e(s)local b=0,n=0,v=-1,o="" for i=1,#s do local p=B91[s:byte(i)] if p then if v<<0 then v=p else v=v+p*91 b=b|(v<<n) n=n+(v&8191)>88 and 13 or 14 v=-1 while n>7 do o=o..string.char(b&255) b=b>>8 n=n-8 end end end end if v>=0 then o=o..string.char((b|(v<<n))&255) end return o end;`;
+        rawPayload = `local B91={};local function b91e(s)local b=0,n=0,v=-1,o="" for i=1,#s do local p=B91[s:byte(i)] if p then if v<<0 then v=p else v=v+p*91 b=b|(v<<n) n=n+(v&8191)>88 and 13 or 14 v=-1 while n>7 do o=o..string.char(b&255) b=b>>8 n=n-8 end end end end if v>=0 then o=o..string.char((b|(v<<n))&255) end return o end;\n` + rawPayload;
     }
 
-    // Combine raw
-    let combinedRaw = '';
-    if(antiTamperCode) combinedRaw += antiTamperCode + '\n';
-    if(encryptStringCode) combinedRaw += encryptStringCode + '\n';
-    combinedRaw += rawPayload;
-
-    // Junk code giống file gốc
-    const junkLen = Math.max(300, Math.min(14000, 15000 - combinedRaw.length));
+    // Junk
+    const junkLen = Math.max(300, Math.min(14000, 15000 - rawPayload.length));
     const junk = Array.from({length:junkLen},()=>String.fromCharCode(33+Math.floor(Math.random()*94))).join('');
-    combinedRaw = `-- JUNK: ${junk}\n` + combinedRaw;
+    const combinedRaw = `-- JUNK: ${junk}\n${rawPayload}`;
 
-    // Encrypt v1 (custom format giống HTML v1)
-    let xorV1 = '';
+    // Encrypt
+    let xorV1='';
     for(let i=0;i<<combinedRaw.length;i++) xorV1 += String.fromCharCode(combinedRaw.charCodeAt(i) ^ xorKey);
     const v1Str = encodeCustom(xorV1);
 
-    // VM Strings (giả lập)
-    const rawVM = `local VM_OPCODES={MOVE=0,LOADK=1,CALL=28,RETURN=30};local function VM_Execute(b,e) local c=loadstring(b);if c then setfenv(c,e or getfenv()) return c() end end;return VM_Execute;`;
-    let xorVM = '';
+    let rawVM = `local VM_OPCODES={MOVE=0,LOADK=1,CALL=28,RETURN=30};local function VM_Execute(b,e) local c=loadstring(b);if c then setfenv(c,e or getfenv()) return c() end end;return VM_Execute;`;
+    let xorVM='';
     for(let i=0;i<<rawVM.length;i++) xorVM += String.fromCharCode(rawVM.charCodeAt(i) ^ xorKey);
     const v3Str = encodeCustom(xorVM);
 
-    // Build Lua output theo đúng format return({...}):Init(ENV)
-    let out = '';
-
-    // Header comment
-    out += `--[ This File Protected by MagicObfuscator V2 — Mode: ${mode.toUpperCase()} ]\n`;
-
-    // Generate VM core
-    const vm = generateVMCore();
-    let tableBody = vm.body;
-
-    if(mode==='vmenc' || mode==='all'){
-        const enc = generateEncryptStringLayer();
-        tableBody += enc.body;
-    }
-    if(mode==='vmanti' || mode==='all'){
-        const anti = generateAntiTamperLayer();
-        tableBody += anti.body;
-    }
-
-    // Init function name ngẫu nhiên
+    // Init name
     const initName = randName(randInt(4,6));
 
-    // Build return table
-    out += `return({${tableBody}}):${initName}((_ENV or(getfenv and getfenv())or _G))\n`;
+    // Build output
+    let out = `--[ This File Protected by MagicObfuscator V2 — ${mode.toUpperCase()} ]\n`;
+    out += `return({${tbl}}):${initName}((_ENV or(getfenv and getfenv())or _G))\n`;
 
-    // Dòng thứ 2: bootstrapper giải mã và chạy (giống cấu trúc file gốc)
-    out += `local ${randName(3)} = "${v1Str}"; local ${randName(3)} = ${v2Math}; local ${randName(3)} = "${v3Str}"; local ${randName(3)} = "${encodeCustom(encodeCustom(v1Str, xorKey), xorKey)}"; local _b = ""; for w in string.gmatch(${randName(3)}, "[^/]+") do local l1 = string.byte(w, 1) - 97; local l2 = string.byte(w, 2) - 97; _b = _b .. string.char(bit32.bxor(l1 * 26 + l2, ${randName(3)})) end; task.spawn(loadstring(_b), ${randName(3)}, ${randName(3)}, ${randName(3)});`;
+    const b1=randName(3), b2=randName(3), b3=randName(3), b4=randName(3);
+    out += `local ${b1} = "${v1Str}"; local ${b2} = ${v2Math}; local ${b3} = "${v3Str}"; local ${b4} = "${encodeCustom(encodeCustom(v1Str, xorKey), xorKey)}"; local _b = ""; for w in string.gmatch(${b4}, "[^/]+") do local l1 = string.byte(w, 1) - 97; local l2 = string.byte(w, 2) - 97; _b = _b .. string.char(bit32.bxor(l1 * 26 + l2, ${b2})) end; task.spawn(loadstring(_b), ${b1}, ${b2}, ${b3});`;
 
     document.getElementById("txtObfuscated").value = out;
 }
