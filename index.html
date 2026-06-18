@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MagicObfuscator V2</title>
+    <title>MagicObfuscator V2 Lua/Luau</title>
     <style>
         :root {
             --bg-color: #0d0614;
@@ -178,7 +178,7 @@
 function randName(len){
     const c='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
     let s='';
-    for(let i=0;i<<len;i++) s+=c[Math.floor(Math.random()*c.length)];
+    for(let i=0;i<len;i++) s+=c[Math.floor(Math.random()*c.length)];
     return s;
 }
 function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
@@ -192,7 +192,7 @@ function encodeCustom(str){
 }
 function genMathExpr(target, steps){
     let cur=randInt(10000,50000), expr=''+cur;
-    for(let i=0;i<<steps-5;i++){
+    for(let i=0;i<steps-5;i++){
         let op=Math.random()>0.5?'+':'-';
         let v=randInt(1000,9999);
         if(op==='+'){ cur+=v; expr+=' + '+v; } else { cur-=v; expr+=' - '+v; }
@@ -215,22 +215,21 @@ function processObfuscation(){
     // Build fake VM functions table body
     let tbl='';
     const names=[];
-    for(let i=0;i<<12;i++) names.push(randName(randInt(3,6)));
+    for(let i=0;i<20;i++) names.push(randName(randInt(3,6)));
 
-    // Fake VM functions with magic numbers
     const m1=randInt(10000,99999), m2=randInt(10000,99999), m3=randInt(10000,99999);
-    const m4=randInt(10000,99999), m5=randInt(10000,99999), m6=randInt(10000,99999);
 
+    // Core VM functions
     tbl+=`[${names[0]}]=function(n,e,l)if type(e)=="table"and not n["${randName(4)}"]then return end;e=(n["${names[1]}"])(n,e);e=(n["${names[2]}"])(n,e);local o=n["${randName(4)}"];n["${randName(4)}"]=e or true;local e=(n["${names[3]}"])(n,e,l);n["${randName(4)}"]=o;return e end,`;
     tbl+=`[${names[1]}]=function(e,n)if n==nil or n==""then return n or""end;local l=e["${randName(4)}"];local o,t="\\000${randName(15)}",l["string"]["sub"];local l=#o;if#n<=l or t(n,1,l)~=o then return n end;local t,l=(e["${names[4]}"])(e,n,l+1);local o;o,l=(e["${names[5]}"])(e,n,l);if not t or o==nil or l~=(#n+1)then return n end;return(e["${names[6]}"])(e,t,o)end,`;
     tbl+=`[${names[2]}]=function(e,n)if n==nil or n==""then return n or""end;local l=e["${randName(4)}"];local o,t="\\001${randName(15)}",l["string"]["sub"];local l=#o;if#n<=l or t(n,1,l)~=o then return n end;local t,l=(e["${names[4]}"])(e,n,l+1);local o;o,l=(e["${names[5]}"])(e,n,l);if not t or o==nil or l~=(#n+1)then return n end;return(e["${names[7]}"])(e,t,o)end,`;
     tbl+=`[${names[3]}]=function(n,l,e)local o=n["${randName(4)}"]["setmetatable"]or setmetatable;local r,a=(n["${names[4]}"])(n,l,1);local e;e,a=(n["${names[4]}"])(n,l,a);if r==""then local r={},n["${randName(3)}"],true,n,(n["${names[8]}"])(n,e or"");local n=o({},{["__index"]=function(i,n)local n=t["bxor"](n,${randInt(1000,9999)});local o=r[n];if o~=nil then if o==l["${randName(4)}"]then return nil end;return o end;local o=a[n];if not o then return nil end;local e=(l["${names[9]}"])(l,e,o,t,n);if i then r[n]=e==nil and l["${randName(4)}"]or e end;return e end,["__metatable"]={}});return n,false end;return n,false end,`;
     tbl+=`[${names[4]}]=function(l,o,n){local e=l["${randName(4)}"];local t=e["string"]["sub"];local e;e,n=(l["${names[5]}"])(l,o,n);if e==nil then return nil,n end;local l=t(o,n,n+e-1);return l or"",n+e end,`;
-    tbl+=`[${names[5]}]=function(n,r,e){local n=n["${randName(4)}"];local e,t,n,o,l=0,n["string"]["byte"],e,1,0;while true do local l=t(r,n);if not l then return nil,n end;l=l+(l%128)*o;n=n+1;if l<<128 then break end;o=o*128;e=e+7;if e>56 then return nil,n end end;return l,n end,`;
-    tbl+=`[${names[6]}]=function(a,l,o){if l==nil or l==""then return l or""end;local n=a["${randName(4)}"];local c,i,d=n["string"]["char"],n["string"]["byte"],n["table"]["concat"];local n,e,r=1,0,{};while n<=#l do local t=d(l,n);if not t then break end;n=n+1;if t<<128 then local o=t+1;if n+o-1>#l then return nil end;for o=0,o-1 do e=e+1;r[e]=c(d(l,n+o))end;n=n+o else local t=(t-128)+3;local o;o,n=(a["${names[5]}"])(a,l,n);if o==nil then return nil end;local n=o+1;if n<=0 or n>e then return nil end;local n=e-n+1;for l=1,t do local l=r[n];if l==nil then return nil end;e=e+1;r[e]=l;n=n+1 end end end;return d(r)end,`;
+    tbl+=`[${names[5]}]=function(n,r,e){local n=n["${randName(4)}"];local e,t,n,o,l=0,n["string"]["byte"],e,1,0;while true do local l=t(r,n);if not l then return nil,n end;l=l+(l%128)*o;n=n+1;if l<128 then break end;o=o*128;e=e+7;if e>56 then return nil,n end end;return l,n end,`;
+    tbl+=`[${names[6]}]=function(a,l,o){if l==nil or l==""then return l or""end;local n=a["${randName(4)}"];local c,i,d=n["string"]["char"],n["string"]["byte"],n["table"]["concat"];local n,e,r=1,0,{};while n<=#l do local t=d(l,n);if not t then break end;n=n+1;if t<128 then local o=t+1;if n+o-1>#l then return nil end;for o=0,o-1 do e=e+1;r[e]=c(d(l,n+o))end;n=n+o else local t=(t-128)+3;local o;o,n=(a["${names[5]}"])(a,l,n);if o==nil then return nil end;local n=o+1;if n<=0 or n>e then return nil end;local n=e-n+1;for l=1,t do local l=r[n];if l==nil then return nil end;e=e+1;r[e]=l;n=n+1 end end end;return d(r)end,`;
     tbl+=`[${names[7]}]=function(n,o,t){local n=n["${randName(4)}"];local c,f,o,d=n["math"]["floor"],n["string"]["byte"],n["string"]["char"],n["table"]["concat"];local function a(e,n){local l,o=0,1;while e>0 or n>0 do local r,t=n%2,e%2;if t~=r then l=l+o end;e=(e-r)/2;n=(n-t)/2;o=o*2 end;return l end;local x=(o["${randName(3)}"]and o["${randName(3)}"]["bxor"])or a;local function a(e){local n=173;for l=1,#e do n=(n*131+f(e,l)+l)%65536 end;return n}end;local o,e=#t,#i;if o==0 then return""end;local n,a,l=a(t),{},o*13%256;for e=1,e do local o=((e-1)%o)+1;local r=f(t,o);local t,o=(n+c(n/256)+r+l)%256,f(i,e);a[e]=d(x(o,t));l=o;n=(n+r*17+e*11+l*7)%65536 end;return d(a)end,`;
-    tbl+=`[${names[8]}]=function(e,l){local c,f,i,n={},#l,1,1;while n<=f do local x=n;local d;local t;local r;local a;local o;c[i]=n;d,n=(e["${names[5]}"])(e,l,n);t,n=(e["${names[5]}"])(e,l,n);r,n=(e["${names[5]}"])(e,l,n);a,n=(e["${names[5]}"])(e,l,n);o,n=(e["${names[5]}"])(e,l,n);if d==nil or t==nil or r==nil or a==nil or o==nil then break end;if t<<0 or r<<0 or a<<0 or o<<0 then break end;local e=n+t+r+a+o;if e<=x then break end;if e>f+1 then break end;n=e;i=i+1 end;return c end,`;
-    tbl+=`[${names[9]}]=function(n,t,d,f,x){local e=n["${randName(4)}"];local h,B,c,s,b=e["string"]["byte"],e["string"]["sub"],n["${randName(3)}"],e["table"]["concat"],e["string"]["char"];local i;local a;local r;local l;local o;local e=d;i,e=(n["${names[5]}"])(n,t,e);a,e=(n["${names[5]}"])(n,t,e);r,e=(n["${names[5]}"])(n,t,e);l,e=(n["${names[5]}"])(n,t,e);o,e=(n["${names[5]}"])(n,t,e);if i==nil or a==nil or r==nil or l==nil or o==nil then return nil end;local u=r+l;if a<<0 or u<=0 or o<<0 then return nil end;local u=#f;if u==0 then return nil end;local i,o={a,r,l,o},c["bxor"](i,${randInt(1000,9999)})%6;local l;if o==0 then l={1,2,3,4}elseif o==1 then l={2,1,4,3}elseif o==2 then l={3,4,1,2}elseif o==3 then l={4,2,1,3}elseif o==4 then l={2,4,3,1}else l={3,1,2,4}end;local a={};for n=1,4 do local n=l[n];local l=i[n]or 0;if l>0 then a[n]=B(t,e,e+l-1)else a[n]=""end;e=e+l end;local function l(e,t){local l={};for n=1,#e do local o,r=t+n-1,h(e,n);local t=((o+(x*${randInt(100,999)})+${randInt(10000,99999)})%u)+1;local t=h(f,t);local e=(((x+${randInt(10000,99999)})*${randInt(100,999)})+(o*${randInt(10,99)})+(o*19)+${randInt(1000,9999)})%256;l[n]=b(c["bxor"](c["bxor"](r,e),t))end;return s(l)}end;local l,e=l(a[2]or"",1),l(a[3]or"",r+1);local e=(n["${names[7]}"])(n,l,e);return(n["${names[10]}"])(n,e)end,`;
+    tbl+=`[${names[8]}]=function(e,l){local c,f,i,n={},#l,1,1;while n<=f do local x=n;local d;local t;local r;local a;local o;c[i]=n;d,n=(e["${names[5]}"])(e,l,n);t,n=(e["${names[5]}"])(e,l,n);r,n=(e["${names[5]}"])(e,l,n);a,n=(e["${names[5]}"])(e,l,n);o,n=(e["${names[5]}"])(e,l,n);if d==nil or t==nil or r==nil or a==nil or o==nil then break end;if t<0 or r<0 or a<0 or o<0 then break end;local e=n+t+r+a+o;if e<=x then break end;if e>f+1 then break end;n=e;i=i+1 end;return c end,`;
+    tbl+=`[${names[9]}]=function(n,t,d,f,x){local e=n["${randName(4)}"];local h,B,c,s,b=e["string"]["byte"],e["string"]["sub"],n["${randName(3)}"],e["table"]["concat"],e["string"]["char"];local i;local a;local r;local l;local o;local e=d;i,e=(n["${names[5]}"])(n,t,e);a,e=(n["${names[5]}"])(n,t,e);r,e=(n["${names[5]}"])(n,t,e);l,e=(n["${names[5]}"])(n,t,e);o,e=(n["${names[5]}"])(n,t,e);if i==nil or a==nil or r==nil or l==nil or o==nil then return nil end;local u=r+l;if a<0 or u<=0 or o<0 then return nil end;local u=#f;if u==0 then return nil end;local i,o={a,r,l,o},c["bxor"](i,${randInt(1000,9999)})%6;local l;if o==0 then l={1,2,3,4}elseif o==1 then l={2,1,4,3}elseif o==2 then l={3,4,1,2}elseif o==3 then l={4,2,1,3}elseif o==4 then l={2,4,3,1}else l={3,1,2,4}end;local a={};for n=1,4 do local n=l[n];local l=i[n]or 0;if l>0 then a[n]=B(t,e,e+l-1)else a[n]=""end;e=e+l end;local function l(e,t){local l={};for n=1,#e do local o,r=t+n-1,h(e,n);local t=((o+(x*${randInt(100,999)})+${randInt(10000,99999)})%u)+1;local t=h(f,t);local e=(((x+${randInt(10000,99999)})*${randInt(100,999)})+(o*${randInt(10,99)})+(o*19)+${randInt(1000,9999)})%256;l[n]=b(c["bxor"](c["bxor"](r,e),t))end;return s(l)}end;local l,e=l(a[2]or"",1),l(a[3]or"",r+1);local e=(n["${names[7]}"])(n,l,e);return(n["${names[10]}"])(n,e)end,`;
     tbl+=`[${names[10]}]=function(n,o){local e=n["${randName(4)}"];local l=e["tonumber"];local e,n=(n["${names[11]}"])(n,o);if n==11 then return l(e)elseif n==4 then return e elseif n==7 then return e=="true"elseif n==6 then return nil end;return e end,`;
     tbl+=`[${names[11]}]=function(n,e){local n=n["${randName(4)}"];local r,l,n,a=n["table"]["concat"],n["string"]["byte"],#e,n["string"]["char"];if n==0 then return"",0 end;local o=l(e,n);if n==1 then return"",o end;local t={};for n=1,n-1 do t[n]=a((l(e,n)+8)%256)end;return r(t),o end,`;
 
@@ -246,7 +245,7 @@ function processObfuscation(){
         rawPayload = `local _e=getfenv and getfenv() or _ENV;local _i=_e.debug and _e.debug.getinfo;if type(_i)=="function" then local c=pcall(function()return _i(2)end) if not c then while true do end end end;if _e.debugresults or _e._25ms then while true do end end;local _t=type(_e.table)=="table" and _e.table;if _t and type(getmetatable(_t))=="table" then while true do end end;\n` + rawPayload;
     }
     if(mode==='vmenc' || mode==='all'){
-        rawPayload = `local B91={};local function b91e(s)local b=0,n=0,v=-1,o="" for i=1,#s do local p=B91[s:byte(i)] if p then if v<<0 then v=p else v=v+p*91 b=b|(v<<n) n=n+(v&8191)>88 and 13 or 14 v=-1 while n>7 do o=o..string.char(b&255) b=b>>8 n=n-8 end end end end if v>=0 then o=o..string.char((b|(v<<n))&255) end return o end;\n` + rawPayload;
+        rawPayload = `local B91={};local function b91e(s)local b=0,n=0,v=-1,o="" for i=1,#s do local p=B91[s:byte(i)] if p then if v<0 then v=p else v=v+p*91 b=b|(v<n) n=n+(v&8191)>88 and 13 or 14 v=-1 while n>7 do o=o..string.char(b&255) b=b>8 n=n-8 end end end end if v>=0 then o=o..string.char((b|(v<n))&255) end return o end;\n` + rawPayload;
     }
 
     // Junk
@@ -256,12 +255,12 @@ function processObfuscation(){
 
     // Encrypt
     let xorV1='';
-    for(let i=0;i<<combinedRaw.length;i++) xorV1 += String.fromCharCode(combinedRaw.charCodeAt(i) ^ xorKey);
+    for(let i=0;i<combinedRaw.length;i++) xorV1 += String.fromCharCode(combinedRaw.charCodeAt(i) ^ xorKey);
     const v1Str = encodeCustom(xorV1);
 
     let rawVM = `local VM_OPCODES={MOVE=0,LOADK=1,CALL=28,RETURN=30};local function VM_Execute(b,e) local c=loadstring(b);if c then setfenv(c,e or getfenv()) return c() end end;return VM_Execute;`;
     let xorVM='';
-    for(let i=0;i<<rawVM.length;i++) xorVM += String.fromCharCode(rawVM.charCodeAt(i) ^ xorKey);
+    for(let i=0;i<rawVM.length;i++) xorVM += String.fromCharCode(rawVM.charCodeAt(i) ^ xorKey);
     const v3Str = encodeCustom(xorVM);
 
     // Init name
